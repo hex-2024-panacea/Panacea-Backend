@@ -1,0 +1,22 @@
+{
+  "name": "api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "eslint": "^9.2.0",
+    "express": "~4.16.1",
+    "mongoose": "^8.3.4",
+    "morgan": "~1.9.1",
+    "typescript": "^5.4.5",
+    "zod": "^3.23.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
