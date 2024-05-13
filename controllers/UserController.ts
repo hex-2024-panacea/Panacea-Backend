@@ -11,12 +11,12 @@ class UserController {
                 data: users
             })
         } catch (error) {
-            res.status(413).json({
-                code: ResponseCode.INVALID_ENTITY,
-                message: "Invalid Parameter",
-                success: false,
-                errors: error.issues,
-            })
+            // res.status(413).json({
+            //     code: ResponseCode.INVALID_ENTITY,
+            //     message: "Invalid Parameter",
+            //     success: false,
+            //     errors: error.issues,
+            // })
         }
     }
 
@@ -37,7 +37,7 @@ class UserController {
         .strict()
         .parse(req.body)
 
-        const user: Model.User = await User.create({
+        const user: any = await User.create({
             ...body
         })
 

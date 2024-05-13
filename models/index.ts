@@ -1,7 +1,10 @@
 import { connect } from 'mongoose';
 import User from './user';
+import 'dotenv/config';
+const { DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME } = process.env;
 
-connect('mongodb://mongo:ts8de0cMF4a9A3EP1YVhrvz5wUgHo672@hkg1.clusters.zeabur.com:32564');
+const connectString: string = `mongodb://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+connect(connectString)
 
 export {
     User

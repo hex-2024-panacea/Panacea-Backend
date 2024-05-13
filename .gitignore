@@ -139,3 +139,9 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node
+
+
+*.js
+*.js.map
+spec/
+!sepc/main.tsp

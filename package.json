@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "tsc --project ./",
+    "build": "tsc --project ./ && tsp compile ./spec/main.tsp --output-dir ./spec && swagger-cli bundle ./spec/@typespec/openapi3/openapi.yaml -t json -o ./spec/swagger.json",
     "lint": "eslint .",
     "start": "node ./bin/www",
     "dev": "tsc -w & nodemon ./bin/www",
+    "build-typescript": "tsc --project ./",
     "build-typespec": "tsp compile ./spec/main.tsp --output-dir ./spec",
     "build-swagger": "swagger-cli bundle ./spec/@typespec/openapi3/openapi.yaml -t json -o ./spec/swagger.json",
     "build-docs": "tsp compile ./spec/main.tsp --output-dir ./spec && swagger-cli bundle ./spec/@typespec/openapi3/openapi.yaml -t json -o ./spec/swagger.json"

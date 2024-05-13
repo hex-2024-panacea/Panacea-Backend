@@ -2,13 +2,12 @@ import { Request, Response } from "express";
 import { ZodError, z } from "zod";
 import { User } from "../models";
 import bcrypt from "bcrypt";
-import MailService from "../services/MailService";
 import AuthService from "../services/AuthService";
 
 class AuthController {
     public authService: AuthService = new AuthService();
 
-    public mailService: MailService = new MailService();
+    // public mailService: MailService = new MailService();
     
     static async signIn(req: Request, res: Response) {
         try {
@@ -102,7 +101,7 @@ class AuthController {
     
     static async verifyEmail(req: Request, res: Response) {
         try {
-            const user: Model.User | null = await User.findOne({
+            const user = await User.findOne({
                 where: {
                     accessToken: req.headers.token
                 }
@@ -128,8 +127,8 @@ class AuthController {
     }
 
     static async sendVerifyMail(user: any, email: string) {
-        const service = new MailService();
-        service.sendMail(email);
+        // const service = new MailService();
+        // service.sendMail(email);
         return true;
     }
 }
