@@ -3,17 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "tsc --project ./ && tsp compile ./spec/main.tsp --output-dir ./spec && swagger-cli bundle ./spec/@typespec/openapi3/openapi.yaml -t json -o ./spec/swagger.json",
-    "dev": "nodemon app.ts",
-    "ts-build": "tsc",
-    "start": "node ./dist/bin/www",
+    "start:test": "node swagger.js && node ./dist/bin/www",
+    "start": "node swagger.js && ts-node ./bin/www.ts",
     "start:dev": "cross-env NODE_ENV=dev nodemon --exec ts-node ./bin/www.ts",
-    "start:pro": "cross-env NODE_ENV=pro nodemon ./dist/bin/www",
+    "start:pro": "tsc && cross-env NODE_ENV=pro nodemon ./dist/bin/www",
     "lint": "eslint .",
-    "build-typescript": "tsc --project ./",
-    "build-typespec": "tsp compile ./spec/main.tsp --output-dir ./spec",
-    "build-swagger": "swagger-cli bundle ./spec/@typespec/openapi3/openapi.yaml -t json -o ./spec/swagger.json",
-    "build-docs": "tsp compile ./spec/main.tsp --output-dir ./spec && swagger-cli bundle ./spec/@typespec/openapi3/openapi.yaml -t json -o ./spec/swagger.json"
+    "generate-swagger": "node swagger.js",
+    "tsc": "tsc"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -27,6 +23,7 @@
     "mongoose": "^8.3.3",
     "morgan": "~1.9.1",
     "nodemailer": "^6.9.13",
+    "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.0",
     "zod": "^3.23.8"
   },
@@ -39,6 +36,8 @@
     "@types/express": "^4.17.21",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.12.11",
+    "@types/nodemailer": "^6.4.15",
+    "@types/swagger-ui-express": "^4.1.6",
     "eslint": "^8.57.0",
     "eslint-plugin-typescript": "^0.14.0",
     "globals": "^15.2.0",
