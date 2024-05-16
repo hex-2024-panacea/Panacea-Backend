@@ -142,5 +142,4 @@ dist
 
 *.env
 uploads
-.vscode
 dist

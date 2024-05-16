@@ -9,7 +9,7 @@ const doc = {
     title: 'PACACEA API',
     description: '後端 API 文件',
   },
-  host: process.env.SWAGGER_HOST,
+  host: process.env.host,
   schema: ['http', 'https'],
 };
 
