@@ -41,3 +41,7 @@ export const sendMail = async (to:string,subject:string,text:string)=>{
 
   await transporter.sendMail(mailOptions);
 }
+
+export const registerMail = (email:string,userId:string)=>{
+
+}
