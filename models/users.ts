@@ -25,9 +25,11 @@ const schema = new mongoose.Schema({
   },
   avatar: {
     type: String,
+    default:null,
   },
   emailVerifiedAt: {
     type: Date,
+    default:null,
   },
   isAdmin: {
     type: Boolean,

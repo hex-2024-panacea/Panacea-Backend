@@ -1,7 +1,6 @@
-import express, { NextFunction } from 'express';
 import crypto from 'crypto';
 import querystring from 'querystring';
-import { Request } from 'express';
+import { Request ,Response,NextFunction} from 'express';
 import appErrorService from '../service/appErrorService';
 
 import dotenv from 'dotenv';
@@ -20,7 +19,7 @@ export const generateSignature = (params:object, expiry:string, secretKey:string
 }
 
 //verifySignature
-export const verifySignature = (params:object, expiry:string, secretKey:string,signature:string)=>{
+export const verifySignature = (params:object, expiry:string,signature:string,secretKey:string)=>{
   const expectedSignature = generateSignature(params, expiry, secretKey);
   return signature === expectedSignature;
 }
@@ -36,19 +35,20 @@ export const temporaraySignature = (apiUrl:string,min:number,params:Dict<string 
     return url;
 }
 
-function verifySignatureMiddleware(req:Request, res:Response, next:NextFunction) {
-  const expires = req.query.expries as string;
-  const signature  = req.query.expries as string;
+export const signedMiddleware = (req:Request, res:Response, next:NextFunction) => {
+  const expires = req.query.expires as string;
+  const signature  = req.query.signature as string;
+
   if(!expires || !signature) {
-    appErrorService(403,'Invalid signature',next);
+    return appErrorService(403,'Invalid signature',next);
   }
   
-  const params  = req.params;
+  const params = req.params;
   const secretKey = process.env.SIGNATURE_KEY!;
   const isValid = verifySignature(params, expires, signature, secretKey);
   
   if (!isValid) {
-    appErrorService(403,'Invalid signature',next);
+    return appErrorService(403,'Invalid signature',next);
   }
   
   next();

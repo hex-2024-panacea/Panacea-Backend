@@ -2,8 +2,9 @@ import handleErrorAsync from '../service/handleErrorAsync';
 import bcrypt from 'bcryptjs';
 import User from '../models/users';
 import appErrorService from '../service/appErrorService';
+import handleSuccess from '../service/handleSuccess';
 import { z } from "zod";
-import { temporaraySignature } from '../service/signature';
+import { temporaraySignature } from '../service/signature';'='
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -21,19 +22,20 @@ export const register = handleErrorAsync(async (req, res, next) => {
   loginSchema.parse( { name, email, password, confirmPassword });
 
   //確認 email 是否已被註冊過
-  const existUser = await User.findOne({email});
-  console.log(existUser);
-  if(existUser){
-    appErrorService(400,'email is exist',next);
+  let user = await User.findOne({email});
+  if(user && user.emailVerifiedAt){
+    return appErrorService(400,'email is exist',next);
   }
-  //如果已被註冊，但沒有認證帳號，會重新寄一次認證信嗎？
+  //如果已被註冊，但沒有認證帳號，重新寄一次認證信
 
   //加密密碼
-  password = await bcrypt.hash(req.body.password, 12)
-  //建立使用者
-  const user = await User.create({
-    name, email, password
-  });
+  if (!user){
+    password = await bcrypt.hash(req.body.password, 12)
+    //建立使用者
+    user = await User.create({
+      name, email, password
+    });
+  }
   //發送帳號驗證信，使用 user id 認證
   //需要用/api/auth/verify/email/:user_id
   const verifyUrl = `/api/auth/verify/email/${user.id}`;
@@ -42,6 +44,25 @@ export const register = handleErrorAsync(async (req, res, next) => {
   res.status(200).send({
     url:temporarayUrl,
   });
+});
+
+export const verifyEmail = handleErrorAsync(async(req, res, next)=>{
+  const { userId } = req.params;
+  const user = await User.findById(userId);
+
+  if(user){
+    await User.findOneAndUpdate(
+      {
+        id: userId
+      },
+      {
+        emailVerifiedAt: Date.now(),
+      }
+    );
+    handleSuccess(res,200,'verify success');
+  }else{
+    return appErrorService(400,'verify failed',next);
+  }
 });
 
 export const signIn = handleErrorAsync(async (req, res, next) => {
