@@ -1,8 +1,14 @@
 import nodemailer from 'nodemailer';
-import {google} from 'googleapis';
+import { temporaraySignature } from './signature';
+import { google } from 'googleapis';
+import path from 'path';
 const OAuth2 = google.auth.OAuth2;
+const exphbs = require('express-handlebars');
+const nodemailerHandlebars = require('nodemailer-express-handlebars');
 
-export const sendMail = async (to:string,subject:string,text:string)=>{
+const mailSender = process.env.MAIL_SENDER;
+
+export const sendMail = async (options:object)=>{
   const GOOGLE_AUTH_CLIENTID = process.env.GOOGLE_AUTH_CLIENTID;
   const GOOGLE_AUTH_CLIENT_SECRET = process.env.GOOGLE_AUTH_CLIENT_SECRET;
   const GOOGLE_AUTH_REFRESH_TOKEN = process.env.GOOGLE_AUTH_REFRESH_TOKEN;
@@ -10,7 +16,7 @@ export const sendMail = async (to:string,subject:string,text:string)=>{
   const oauth2Client = new OAuth2(
     GOOGLE_AUTH_CLIENTID, 
     GOOGLE_AUTH_CLIENT_SECRET, 
-    "https://developers.google.com/oauthplayground" 
+    'https://developers.google.com/oauthplayground' 
   );
 
   oauth2Client.setCredentials({
@@ -18,7 +24,6 @@ export const sendMail = async (to:string,subject:string,text:string)=>{
   });
 
   const accessToken = oauth2Client.getAccessToken();
-  const mailSender = process.env.MAIL_SENDER;
 
   let transporter = nodemailer.createTransport({
     service:'gmail',
@@ -32,16 +37,40 @@ export const sendMail = async (to:string,subject:string,text:string)=>{
     }
   } as nodemailer.TransportOptions);
 
-  const mailOptions = {
-    from:mailSender,
-    to,
-    subject,
-    text
+  const handlebarsOptions = {
+    viewEngine: {
+      extName: '.handlebars',
+      partialsDir: path.join(__dirname, '..', 'templates'), 
+      layoutsDir: path.join(__dirname, '..', 'templates'), 
+      defaultLayout: 'emailTemplate.handlebars' 
+    },
+    viewPath: path.join(__dirname, '..', 'templates'), 
+    extName: '.handlebars'
   };
 
-  await transporter.sendMail(mailOptions);
+  transporter.use('compile', nodemailerHandlebars(handlebarsOptions));
+
+  await transporter.sendMail(options);
 }
 
-export const registerMail = (email:string,userId:string)=>{
+export const registerMailSend = async (email:string,userId:string)=>{
 
+  const verifyUrl = `/api/auth/verify/email/${userId}`;
+  const temporarayUrl = temporaraySignature(verifyUrl,60,{userId:userId});
+  
+  let mailOptions = {
+    from: mailSender,
+    to: email,
+    subject: '這是郵件標題',
+    template:'emailTemplate',
+    context:{
+      title:'title',
+      header:'header',
+      content:'content',
+      buttonLink:temporarayUrl,
+      buttonText:'button'
+    },
+  };
+
+  await sendMail(mailOptions);
 }

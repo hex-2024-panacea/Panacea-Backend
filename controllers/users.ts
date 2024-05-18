@@ -4,9 +4,9 @@ import User from '../models/users';
 import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { z } from "zod";
-import { temporaraySignature } from '../service/signature';'='
+import { registerMailSend } from '../service/mail';
 
-const loginSchema = z.object({
+const registerSchema = z.object({
   email: z.string().email(),
   name: z.string(),
   password: z.string().min(8),
@@ -16,19 +16,23 @@ const loginSchema = z.object({
   path: ["confirmPassword"], // path of error
 });
 
+const loginSchema = z.object({
+  email:z.string().email(),
+  password:z.string().min(8)
+});
+
 export const register = handleErrorAsync(async (req, res, next) => {
   //check email、password、name、confirmpassword
   let { name, email, password, confirmPassword } = req.body
-  loginSchema.parse( { name, email, password, confirmPassword });
+  registerSchema.parse( { name, email, password, confirmPassword });
 
   //確認 email 是否已被註冊過
+  //如果已被註冊，但沒有認證帳號，重新寄一次認證信
   let user = await User.findOne({email});
   if(user && user.emailVerifiedAt){
     return appErrorService(400,'email is exist',next);
   }
-  //如果已被註冊，但沒有認證帳號，重新寄一次認證信
 
-  //加密密碼
   if (!user){
     password = await bcrypt.hash(req.body.password, 12)
     //建立使用者
@@ -36,14 +40,8 @@ export const register = handleErrorAsync(async (req, res, next) => {
       name, email, password
     });
   }
-  //發送帳號驗證信，使用 user id 認證
-  //需要用/api/auth/verify/email/:user_id
-  const verifyUrl = `/api/auth/verify/email/${user.id}`;
-  const temporarayUrl = temporaraySignature(verifyUrl,60,{userId:user.id});
-  console.log(temporarayUrl);
-  res.status(200).send({
-    url:temporarayUrl,
-  });
+  await registerMailSend(email,user.id);
+  handleSuccess(res,200,'email is sent');
 });
 
 export const verifyEmail = handleErrorAsync(async(req, res, next)=>{
@@ -51,9 +49,9 @@ export const verifyEmail = handleErrorAsync(async(req, res, next)=>{
   const user = await User.findById(userId);
 
   if(user){
-    await User.findOneAndUpdate(
+    await User.findByIdAndUpdate(
       {
-        id: userId
+        _id: userId
       },
       {
         emailVerifiedAt: Date.now(),
@@ -66,8 +64,9 @@ export const verifyEmail = handleErrorAsync(async(req, res, next)=>{
 });
 
 export const signIn = handleErrorAsync(async (req, res, next) => {
-  //test
   let { email, password, name } = req.body
+  loginSchema.parse( { email, password, name });
+
   password = await bcrypt.hash(req.body.password, 12)
   console.log(password);
   //確認 email,password

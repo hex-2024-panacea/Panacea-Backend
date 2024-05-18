@@ -10,7 +10,6 @@ type Dict<T> = {
   [key: string]: T;
 };
 
-//generalSignature
 export const generateSignature = (params:object, expiry:string, secretKey:string) => {
   const hmac = crypto.createHmac('sha256', secretKey);
   const data = `${JSON.stringify(params)}:${expiry}`;
@@ -18,18 +17,19 @@ export const generateSignature = (params:object, expiry:string, secretKey:string
   return hmac.digest('hex');
 }
 
-//verifySignature
 export const verifySignature = (params:object, expiry:string,signature:string,secretKey:string)=>{
   const expectedSignature = generateSignature(params, expiry, secretKey);
+  const now = Date.now();
+  if(Number(expiry) < now){
+    return  false;
+  }
   return signature === expectedSignature;
 }
 
-//temporarayUrl
 export const temporaraySignature = (apiUrl:string,min:number,params:Dict<string | number | boolean>)=>{
   const expiry = Date.now() + min * 60 * 1000;
   const secretKey = process.env.SIGNATURE_KEY!;
   const signature = generateSignature(params, expiry.toString(), secretKey);
-  const queryString = querystring.stringify(params);
 
   const url = `${apiUrl}?expires=${expiry}&signature=${signature}`;
     return url;
