@@ -1,14 +1,16 @@
 import nodemailer from 'nodemailer';
+import path from 'path';
+import handleSuccess from './handleSuccess';
+import { Response } from 'express';
 import { temporaraySignature } from './signature';
 import { google } from 'googleapis';
-import path from 'path';
 const OAuth2 = google.auth.OAuth2;
 const exphbs = require('express-handlebars');
 const nodemailerHandlebars = require('nodemailer-express-handlebars');
 
 const mailSender = process.env.MAIL_SENDER;
 
-export const sendMail = async (options:object)=>{
+export const sendMail = async (options:object, res:Response)=>{
   const GOOGLE_AUTH_CLIENTID = process.env.GOOGLE_AUTH_CLIENTID;
   const GOOGLE_AUTH_CLIENT_SECRET = process.env.GOOGLE_AUTH_CLIENT_SECRET;
   const GOOGLE_AUTH_REFRESH_TOKEN = process.env.GOOGLE_AUTH_REFRESH_TOKEN;
@@ -51,9 +53,11 @@ export const sendMail = async (options:object)=>{
   transporter.use('compile', nodemailerHandlebars(handlebarsOptions));
 
   await transporter.sendMail(options);
+
+  handleSuccess(res,200,'email is sent');
 }
 
-export const registerMailSend = async (email:string,userId:string)=>{
+export const registerMailSend = async (email:string,userId:string,res:Response)=>{
 
   const verifyUrl = `/api/auth/verify/email/${userId}`;
   const temporarayUrl = temporaraySignature(verifyUrl,60,{userId:userId});
@@ -72,5 +76,5 @@ export const registerMailSend = async (email:string,userId:string)=>{
     },
   };
 
-  await sendMail(mailOptions);
+  await sendMail(mailOptions,res);
 }

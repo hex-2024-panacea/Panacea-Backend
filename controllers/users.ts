@@ -22,6 +22,11 @@ const signinSchema = z.object({
   password:z.string().min(8)
 });
 
+const verifyEmailSchema = z.object({
+  email:z.string().email(),
+});
+
+
 export const register = handleErrorAsync(async (req, res, next) => {
   //check email、password、name、confirmpassword
   let { name, email, password, confirmPassword } = req.body
@@ -41,8 +46,34 @@ export const register = handleErrorAsync(async (req, res, next) => {
       name, email, password
     });
   }
-  await registerMailSend(email,user.id);
-  handleSuccess(res,200,'email is sent');
+  await registerMailSend(email,user.id,res);
+});
+
+export const signIn = handleErrorAsync(async (req, res, next) => {
+  let { email, password } = req.body;
+  signinSchema.parse( { email, password });
+
+  const user = await User.findOne({email}).select('+password');
+  if(user && await bcrypt.compare(password,user!.password as string)){
+    //產生 token
+    generateJwtSend(user.id,res);
+  }else {
+    appErrorService(400,'email or password is not correct',next);
+  }
+});
+
+export const sendVerifyEmail = handleErrorAsync(async (req, res, next)=>{
+  const {email} = req.body;
+  verifyEmailSchema.parse({email});
+
+  const user = await User.findOne({email,emailVerifiedAt:null});
+  if(user){
+    await registerMailSend(email,user.id,res);
+  }else{
+    //看要哪一種，怕被測出 mail 是否存在
+    handleSuccess(res,200,'mail is sent');
+    // return appErrorService(400,'email sent failed',next);
+  }
 });
 
 export const verifyEmail = handleErrorAsync(async(req, res, next)=>{
@@ -62,21 +93,4 @@ export const verifyEmail = handleErrorAsync(async(req, res, next)=>{
   }else{
     return appErrorService(400,'verify failed',next);
   }
-});
-
-export const signIn = handleErrorAsync(async (req, res, next) => {
-  let { email, password } = req.body
-  signinSchema.parse( { email, password });
-
-  const user = await User.findOne({email}).select('+password');
-  if(user && await bcrypt.compare(password,user!.password as string)){
-    //產生 token
-    generateJwtSend(user._id,res);
-  }else {
-    appErrorService(400,'email or password is not correct',next);
-  }
-});
-
-export const sendVerifyEmail = handleErrorAsync(async (req, res, next)=>{
-  
 });
