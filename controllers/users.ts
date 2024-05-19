@@ -4,7 +4,7 @@ import User from '../models/users';
 import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { z } from "zod";
-import { registerMailSend } from '../service/mail';
+import { registerMailSend, forgetPasswordSend } from '../service/mail';
 import { generateJwtSend } from '../service/auth';
 
 const registerSchema = z.object({
@@ -16,15 +16,20 @@ const registerSchema = z.object({
   message: "password don't match",
   path: ["confirmPassword"], // path of error
 });
-
 const signinSchema = z.object({
   email:z.string().email(),
   password:z.string().min(8)
 });
-
 const verifyEmailSchema = z.object({
   email:z.string().email(),
 });
+const resetPasswordSchema = z.object({
+  password: z.string().min(8),
+  confirmPassword: z.string().min(8),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "password don't match",
+  path: ["confirmPassword"], // path of error
+});;
 
 
 export const register = handleErrorAsync(async (req, res, next) => {
@@ -89,8 +94,46 @@ export const verifyEmail = handleErrorAsync(async(req, res, next)=>{
         emailVerifiedAt: Date.now(),
       }
     );
-    handleSuccess(res,200,'verify success');
+    handleSuccess(res,200,'mail is verified');
   }else{
     return appErrorService(400,'verify failed',next);
+  }
+});
+
+export const sendForgetPassword = handleErrorAsync(async(req, res, next)=>{
+  const {email} = req.body;
+  verifyEmailSchema.parse({email});
+
+  const user = await User.findOne({email});
+  if(user){
+    await forgetPasswordSend(email,user.id,res);
+  }else{
+    //看要哪一種，怕被測出 mail 是否存在
+    handleSuccess(res,200,'mail is sent');
+    // return appErrorService(400,'email sent failed',next);
+  }
+});
+
+export const resetPassword = handleErrorAsync(async(req, res, next)=>{
+  //reset password from forget password
+  const { password, confirmPassword } = req.body;
+  resetPasswordSchema.parse({password,confirmPassword});   
+
+  const { userId } = req.params;
+  const user = await User.findById(userId);
+
+  if(user){
+    const newPassword = await bcrypt.hash(req.body.password, 12);
+    await User.findByIdAndUpdate(
+      {
+        _id: userId
+      },
+      {
+        password: newPassword,
+      }
+    );
+    handleSuccess(res,200,'password reset');
+  }else{
+    return appErrorService(400,'發生錯誤',next);
   }
 });

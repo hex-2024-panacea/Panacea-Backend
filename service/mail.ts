@@ -58,9 +58,31 @@ export const sendMail = async (options:object, res:Response)=>{
 }
 
 export const registerMailSend = async (email:string,userId:string,res:Response)=>{
-
-  const verifyUrl = `/api/auth/verify/email/${userId}`;
+  //verifyUrl 改成前端的 pageUrl 加上 temporarayUrl 的 expires,signature,userId
+  const verifyUrl = `/api/auth/email-link/${userId}`;
   const temporarayUrl = temporaraySignature(verifyUrl,60,{userId:userId});
+  
+  let mailOptions = {
+    from: mailSender,
+    to: email,
+    subject: '這是郵件標題',
+    template:'emailTemplate',
+    context:{
+      title:'title',
+      header:'header',
+      content:'content',
+      buttonLink:temporarayUrl,
+      buttonText:'button'
+    },
+  };
+
+  await sendMail(mailOptions,res);
+}
+
+export const forgetPasswordSend = async(email:string,userId:string,res:Response)=>{
+  //url 改成前端的 pageUrl 加上 temporarayUrl 的 expires,signature,userId
+  const url = `/api/auth/reset-password/${userId}`;
+  const temporarayUrl = temporaraySignature(url,60,{userId:userId});
   
   let mailOptions = {
     from: mailSender,
