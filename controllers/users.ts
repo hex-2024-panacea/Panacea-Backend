@@ -5,6 +5,7 @@ import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { z } from "zod";
 import { registerMailSend } from '../service/mail';
+import { generateJwtSend } from '../service/auth';
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -16,7 +17,7 @@ const registerSchema = z.object({
   path: ["confirmPassword"], // path of error
 });
 
-const loginSchema = z.object({
+const signinSchema = z.object({
   email:z.string().email(),
   password:z.string().min(8)
 });
@@ -64,11 +65,18 @@ export const verifyEmail = handleErrorAsync(async(req, res, next)=>{
 });
 
 export const signIn = handleErrorAsync(async (req, res, next) => {
-  let { email, password, name } = req.body
-  loginSchema.parse( { email, password, name });
+  let { email, password } = req.body
+  signinSchema.parse( { email, password });
 
-  password = await bcrypt.hash(req.body.password, 12)
-  console.log(password);
-  //確認 email,password
-  //產生 token
+  const user = await User.findOne({email}).select('+password');
+  if(user && await bcrypt.compare(password,user!.password as string)){
+    //產生 token
+    generateJwtSend(user._id,res);
+  }else {
+    appErrorService(400,'email or password is not correct',next);
+  }
+});
+
+export const sendVerifyEmail = handleErrorAsync(async (req, res, next)=>{
+  
 });
