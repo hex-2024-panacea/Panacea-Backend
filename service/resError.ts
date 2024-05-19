@@ -8,9 +8,9 @@ const resErrorProd = function (err:AppError, res:Response) {
     });
   } else {
     console.error('error', err);
-    res.status(500).json({
-      code: 500,
-      message: 'Server Error',
+    res.status(400).json({
+      code: 400,
+      message: '發生錯誤',
     });
   }
 };
