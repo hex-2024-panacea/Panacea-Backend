@@ -8,14 +8,15 @@ import AppError from './types/AppError';
 import appErrorService from './service/appErrorService';
 import { resErrorProd, resErrorDev } from './service/resError';
 import swaggerUI from 'swagger-ui-express';
+import { rateLimit } from 'express-rate-limit';
 //env
 import dotenv from 'dotenv';
+dotenv.config({ path: './.env' });
 
 const rootDir = process.cwd();
 const swaggerFilePath = path.join(rootDir, 'swagger-output.json');
 const swaggerFile = require(swaggerFilePath);
 
-dotenv.config({ path: './.env' });
 
 //mongoose
 const DB = process.env.DATABASE!.replace('<password>', process.env.DATABASE_PASSWORD!);
@@ -38,6 +39,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+//rate limit
+const limiter = rateLimit({
+	windowMs: 1 * 60 * 1000,
+	limit: 100, 
+	standardHeaders: 'draft-7', 
+	legacyHeaders: false,
+})
+app.use(limiter)
 
 //route
 app.use('/', usersRouter);
