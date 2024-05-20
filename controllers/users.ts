@@ -120,18 +120,17 @@ export const resetPassword = handleErrorAsync(async(req, res, next)=>{
   resetPasswordSchema.parse({password,confirmPassword});   
 
   const { userId } = req.params;
-  const user = await User.findById(userId);
+  const newPassword = await bcrypt.hash(req.body.password, 12);
 
+  const user = await User.findByIdAndUpdate(
+    {
+      _id: userId
+    },
+    {
+      password: newPassword,
+    }
+  );
   if(user){
-    const newPassword = await bcrypt.hash(req.body.password, 12);
-    await User.findByIdAndUpdate(
-      {
-        _id: userId
-      },
-      {
-        password: newPassword,
-      }
-    );
     handleSuccess(res,200,'password reset');
   }else{
     return appErrorService(400,'發生錯誤',next);
