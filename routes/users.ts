@@ -9,6 +9,6 @@ router.post('/api/auth/sign-in',signIn);
 router.post('/api/auth/verify-email',sendVerifyEmail);
 router.get('/api/auth/email-link/:userId',signedMiddleware,verifyEmail);
 router.post('/api/auth/forget-password',sendForgetPassword);
-router.get('/api/auth/reset-password/:userId',signedMiddleware,resetPassword);
+router.post('/api/auth/reset-password/:userId',signedMiddleware,resetPassword);
 
 export default router;
