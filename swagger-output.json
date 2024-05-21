@@ -6,13 +6,18 @@
     "version": "1.0.0"
   },
   "basePath": "/",
-  "schemes": [
-    "http"
+  "schemes": ["http"],
+  "tag": [
+    {
+      "name": "Auth"
+    }
   ],
   "paths": {
     "/api/auth/register": {
       "post": {
-        "description": "",
+        "summary": "註冊學員帳號",
+        "description": "註冊學員帳號",
+        "tags": ["Auth"],
         "parameters": [
           {
             "name": "body",
@@ -20,14 +25,21 @@
             "schema": {
               "type": "object",
               "properties": {
-                "password": {
-                  "example": "any"
+                "name": {
+                  "type": "string",
+                  "example": "user"
                 },
                 "email": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "user@gmail.com"
                 },
-                "name": {
-                  "example": "any"
+                "password": {
+                  "type": "string",
+                  "example": "test1234"
+                },
+                "confirmPassword": {
+                  "type": "string",
+                  "example": "test1234"
                 }
               }
             }
@@ -42,7 +54,9 @@
     },
     "/api/auth/sign-in": {
       "post": {
-        "description": "",
+        "summary": "登入",
+        "description": "登入",
+        "tags": ["Auth"],
         "parameters": [
           {
             "name": "body",
@@ -50,13 +64,10 @@
             "schema": {
               "type": "object",
               "properties": {
-                "password": {
-                  "example": "any"
-                },
                 "email": {
                   "example": "any"
                 },
-                "name": {
+                "password": {
                   "example": "any"
                 }
               }
@@ -70,19 +81,116 @@
         }
       }
     },
-    "/": {
-      "get": {
-        "description": "",
+    "/api/auth/verify-email": {
+      "post": {
+        "summary": "發送信箱驗證信",
+        "description": "發送信箱驗證信",
+        "tags": ["Auth"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/email-link/{userId}": {
+      "get": {
+        "summary": "驗證信箱連結",
+        "description": "驗證信箱連結",
+        "tags": ["Auth"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "expires",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "signature",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/forget-password": {
+      "post": {
+        "summary": "寄送密碼重置信",
+        "description": "寄送密碼重置信",
+        "tags": ["Auth"],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/reset-password/{userId}": {
+      "post": {
+        "summary": "重新設定密碼",
+        "description": "重新設定密碼",
+        "tags": ["Auth"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "expires",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "signature",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
           }
         }
       }
     }
   },
-  "schema": [
-    "http",
-    "https"
-  ]
+  "schema": ["http", "https"]
 }

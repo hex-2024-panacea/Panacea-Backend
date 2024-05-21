@@ -1,9 +1,9 @@
-import { Request,Response,NextFunction } from "express";
-import { MiddlewareFun } from "../types/MiddlewareFun";
+import type { Request, Response, NextFunction } from 'express';
+import { MiddlewareFun } from '../types/MiddlewareFun';
 
-const handleErrorAsync = (fun:MiddlewareFun) => {
-  return function (req:Request, res:Response, next:NextFunction) {
-    return fun(req, res, next).catch((err:Error) => next(err));
+const handleErrorAsync = (fun: MiddlewareFun) => {
+  return function (req: Request, res: Response, next: NextFunction) {
+    return fun(req, res, next).catch((err: Error) => next(err));
   };
 };
 

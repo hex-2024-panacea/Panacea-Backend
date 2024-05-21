@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const schema = new mongoose.Schema({
   createdAt: {
@@ -25,9 +25,11 @@ const schema = new mongoose.Schema({
   },
   avatar: {
     type: String,
+    default: null,
   },
   emailVerifiedAt: {
     type: Date,
+    default: null,
   },
   isAdmin: {
     type: Boolean,
