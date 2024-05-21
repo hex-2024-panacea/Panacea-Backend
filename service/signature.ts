@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import querystring from 'querystring';
 import { Request ,Response,NextFunction} from 'express';
 import appErrorService from '../service/appErrorService';
 
@@ -10,14 +9,14 @@ type Dict<T> = {
   [key: string]: T;
 };
 
-export const generateSignature = (apiUrl:string,params:object, expiry:string, secretKey:string) => {
+export const generateSignature = (apiUrl:string, params:object, expiry:string, secretKey:string) => {
   const hmac = crypto.createHmac('sha256', secretKey);
   const data = `${apiUrl}:${JSON.stringify(params)}:${expiry}`;
   hmac.update(data);
   return hmac.digest('hex');
 }
 
-export const verifySignature = (apiUrl:string,params:object, expiry:string,signature:string,secretKey:string)=>{
+export const verifySignature = (apiUrl:string, params:object, expiry:string,signature:string,secretKey:string)=>{
   const expectedSignature = generateSignature(apiUrl,params, expiry, secretKey);
   const now = Date.now();
   if(Number(expiry) < now){
@@ -32,7 +31,11 @@ export const temporaraySignature = (apiUrl:string,min:number,params:Dict<string 
   const signature = generateSignature(apiUrl,params, expiry.toString(), secretKey);
 
   const url = `${apiUrl}?expires=${expiry}&signature=${signature}`;
-    return url;
+  return {
+    url:url,
+    expires:expiry,
+    signature:signature
+  }
 }
 
 export const signedMiddleware = (req:Request, res:Response, next:NextFunction) => {
@@ -47,7 +50,7 @@ export const signedMiddleware = (req:Request, res:Response, next:NextFunction) =
   const secretKey = process.env.SIGNATURE_KEY!;
   const originalUrl = req.originalUrl;
   const urlWithoutQuery = originalUrl.split('?')[0];
-  const isValid = verifySignature(urlWithoutQuery,params, expires, signature, secretKey);
+  const isValid = verifySignature(urlWithoutQuery, params, expires, signature, secretKey);
   
   if (!isValid) {
     return appErrorService(403,'Invalid signature',next);

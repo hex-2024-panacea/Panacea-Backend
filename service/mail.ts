@@ -58,9 +58,12 @@ export const sendMail = async (options:object, res:Response)=>{
 }
 
 export const registerMailSend = async (email:string,userId:string,res:Response)=>{
-  //verifyUrl 改成前端的 pageUrl 加上 temporarayUrl 的 expires,signature,userId
+  //webUrl 改成前端的 pageUrl 加上 temporarayUrl 的 expires,signature,userId
   const verifyUrl = `/api/auth/email-link/${userId}`;
-  const temporarayUrl = temporaraySignature(verifyUrl,60,{userId:userId});
+  const signatureOb = temporaraySignature(verifyUrl,60,{userId:userId});
+
+  const {  expires, signature } = signatureOb;
+  const webUrl = `${process.env.FRONTEND_URL}/verify/email/${userId}?expires=${expires}&signature=${signature}`;
   
   let mailOptions = {
     from: mailSender,
@@ -71,7 +74,7 @@ export const registerMailSend = async (email:string,userId:string,res:Response)=
       title:'title',
       header:'header',
       content:'content',
-      buttonLink:temporarayUrl,
+      buttonLink:webUrl,
       buttonText:'button'
     },
   };
@@ -82,7 +85,10 @@ export const registerMailSend = async (email:string,userId:string,res:Response)=
 export const forgetPasswordSend = async(email:string,userId:string,res:Response)=>{
   //url 改成前端的 pageUrl 加上 temporarayUrl 的 expires,signature,userId
   const url = `/api/auth/reset-password/${userId}`;
-  const temporarayUrl = temporaraySignature(url,60,{userId:userId});
+  const signatureOb = temporaraySignature(url,60,{userId:userId});
+
+  const {  expires, signature } = signatureOb;
+  const webUrl = `${process.env.FRONTEND_URL}/forget-passowrd/${userId}?expires=${expires}&signature=${signature}`;
   
   let mailOptions = {
     from: mailSender,
@@ -93,7 +99,7 @@ export const forgetPasswordSend = async(email:string,userId:string,res:Response)
       title:'title',
       header:'header',
       content:'content',
-      buttonLink:temporarayUrl,
+      buttonLink:webUrl,
       buttonText:'button'
     },
   };
