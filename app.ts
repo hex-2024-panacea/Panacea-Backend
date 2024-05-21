@@ -8,7 +8,8 @@ import AppError from './types/AppError';
 import appErrorService from './service/appErrorService';
 import { resErrorProd, resErrorDev } from './service/resError';
 import swaggerUI from 'swagger-ui-express';
-import { rateLimit } from 'express-rate-limit';
+import apiLimiter from './service/rateLimit';
+
 //env
 import dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
@@ -40,15 +41,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//rate limit
-const limiter = rateLimit({
-	windowMs: 1 * 60 * 1000,
-	limit: 100, 
-	standardHeaders: 'draft-7', 
-	legacyHeaders: false,
-})
-app.use(limiter)
-
+//api rate limit
+app.use('/api', apiLimiter);
 //route
 app.use('/', usersRouter);
 app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerFile));
