@@ -1,17 +1,17 @@
-import { Response } from 'express';
-
-const handleSuccess = (res:Response,statusCode:number,message:string,data: object|[]|null = null)=>{
-  const responseData:{
-    code:number,
-    message?:string
-    data?:object|[]|null
-  } = {
-    code:statusCode,
+import type { Response } from 'express';
+type responseDataType = {
+  code: number;
+  message?: string;
+  data?: object | [] | null;
+};
+const handleSuccess = (res: Response, statusCode: number, message: string, data: object | [] | null = null) => {
+  const responseData: responseDataType = {
+    code: statusCode,
   };
-  if(message){
+  if (message) {
     responseData.message = message;
   }
-  if(data){
+  if (data) {
     responseData.data = data;
   }
   res.status(statusCode).json(responseData);

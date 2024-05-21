@@ -1,5 +1,5 @@
-const throttle = require("express-throttle");
-import { Request, Response, NextFunction } from "express";
+const throttle = require('express-throttle');
+import type { Request, Response, NextFunction } from 'express';
 import appErrorService from './appErrorService';
 
 interface Bucket {
@@ -7,11 +7,11 @@ interface Bucket {
 }
 
 const options = {
-  "burst": 5,
-  "period": "180s",
-  "on_throttled": function(req:Request, res:Response, next:NextFunction, bucket:Bucket) {
-    return appErrorService(429,'too many attempts',next);
-  }
+  burst: 5,
+  period: '180s',
+  on_throttled: function (req: Request, res: Response, next: NextFunction, bucket: Bucket) {
+    return appErrorService(429, 'too many attempts', next);
+  },
 };
 
 export default throttle(options);

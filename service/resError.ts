@@ -1,7 +1,7 @@
-import { Response } from 'express';
+import type { Response } from 'express';
 import AppError from '../types/AppError';
 
-const resErrorProd = function (err:AppError, res:Response) {
+const resErrorProd = function (err: AppError, res: Response) {
   if (err.isOperational) {
     res.status(err.statusCode).json({
       message: err.message,
@@ -14,7 +14,7 @@ const resErrorProd = function (err:AppError, res:Response) {
     });
   }
 };
-const resErrorDev = function (err:AppError, res:Response) {
+const resErrorDev = function (err: AppError, res: Response) {
   res.status(err.statusCode).json({
     message: err.message,
     error: err,
@@ -22,7 +22,4 @@ const resErrorDev = function (err:AppError, res:Response) {
   });
 };
 
-export {
-  resErrorProd,
-  resErrorDev,
-};
+export { resErrorProd, resErrorDev };

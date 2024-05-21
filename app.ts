@@ -9,7 +9,8 @@ import appErrorService from './service/appErrorService';
 import { resErrorProd, resErrorDev } from './service/resError';
 import swaggerUI from 'swagger-ui-express';
 import apiLimiter from './service/rateLimit';
-
+//router
+import usersRouter from './routes/users';
 //env
 import dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
@@ -17,7 +18,6 @@ dotenv.config({ path: './.env' });
 const rootDir = process.cwd();
 const swaggerFilePath = path.join(rootDir, 'swagger-output.json');
 const swaggerFile = require(swaggerFilePath);
-
 
 //mongoose
 const DB = process.env.DATABASE!.replace('<password>', process.env.DATABASE_PASSWORD!);
@@ -29,9 +29,6 @@ mongoose
   .catch((err: Error) => {
     console.log(err, '資料庫連線異常');
   });
-
-//router
-import usersRouter from './routes/users';
 
 const app = express();
 
