@@ -5,12 +5,16 @@ import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { registerMailSend, forgetPasswordSend } from '../service/mail';
 import { generateJwtSend } from '../service/auth';
-import { registerZod, signinZod, verifyEmailZod, resetPasswordZod } from '../zods/users';
+import {
+  registerZod,
+  signinZod,
+  verifyEmailZod,
+  resetPasswordZod,
+} from '../zods/users';
 
 export const register = handleErrorAsync(async (req, res, next) => {
   //check email、password、name、confirmPassword
   let { name, email, password, confirmPassword } = req.body;
-  console.log('123234', { name, email, password, confirmPassword });
   registerZod.parse({ name, email, password, confirmPassword });
 
   //確認 email 是否已被註冊過
@@ -36,7 +40,10 @@ export const signIn = handleErrorAsync(async (req, res, next) => {
   let { email, password } = req.body;
   signinZod.parse({ email, password });
 
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({
+    email,
+    emailVerifiedAt: { $ne: null },
+  }).select('+password');
   if (user && (await bcrypt.compare(password, user!.password as string))) {
     //產生 token
     generateJwtSend(user.id, res);
@@ -70,7 +77,7 @@ export const verifyEmail = handleErrorAsync(async (req, res, next) => {
       },
       {
         emailVerifiedAt: Date.now(),
-      }
+      },
     );
     handleSuccess(res, 200, 'mail is verified');
   } else {
@@ -106,7 +113,7 @@ export const resetPassword = handleErrorAsync(async (req, res, next) => {
     },
     {
       password: newPassword,
-    }
+    },
   );
   if (user) {
     handleSuccess(res, 200, 'password reset');
