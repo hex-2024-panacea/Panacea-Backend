@@ -1,4 +1,5 @@
-import type { Response } from 'express';
+import appErrorService from './appErrorService';
+import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import handleSuccess from './handleSuccess';
 import OauthAccessToken from '../models/oauthAccessToken';
@@ -39,3 +40,20 @@ const extractDays = (expiresIn: string) => {
   return match ? parseInt(match[1], 10) : 7;
 };
 //isAuth
+export const isAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    return appErrorService(401, 'unauthenticated', next);
+  }
+};
