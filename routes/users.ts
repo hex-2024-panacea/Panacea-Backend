@@ -14,7 +14,7 @@ const router = express.Router();
 //user signin,signup
 router.post('/api/auth/register', register);
 router.post('/api/auth/sign-in', throttle, signIn);
-router.post('/api/auth/verify-email', sendVerifyEmail);
+router.post('/api/auth/verify-email', throttle, sendVerifyEmail);
 router.get('/api/auth/email-link/:userId', signedMiddleware, verifyEmail);
 router.post('/api/auth/forget-password', throttle, sendForgetPassword);
 router.post(

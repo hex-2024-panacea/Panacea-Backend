@@ -18,11 +18,11 @@ export const register = handleErrorAsync(async (req, res, next) => {
   registerZod.parse({ name, email, password, confirmPassword });
 
   //確認 email 是否已被註冊過
-  //如果已被註冊，但沒有認證帳號，重新寄一次認證信
   let user = await User.findOne({ email });
   if (user && user.emailVerifiedAt) {
     return appErrorService(400, 'email is exist', next);
   }
+  //如果已被註冊，但沒有認證帳號，重新寄一次認證信
 
   if (!user) {
     password = await bcrypt.hash(req.body.password, 12);
@@ -44,6 +44,7 @@ export const signIn = handleErrorAsync(async (req, res, next) => {
     email,
     emailVerifiedAt: { $ne: null },
   }).select('+password');
+  //如果信箱尚未驗證，發認證信
   if (user && (await bcrypt.compare(password, user!.password as string))) {
     //產生 token
     generateJwtSend(user.id, res);
