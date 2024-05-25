@@ -1,9 +1,12 @@
+import { ObjectId } from 'mongodb';
+import { Request, Response, NextFunction } from 'express';
 import appErrorService from './appErrorService';
-import type { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import handleSuccess from './handleSuccess';
+import jwt from 'jsonwebtoken';
 import OauthAccessToken from '../models/oauthAccessToken';
-import type { ObjectId } from 'mongodb';
+import User from '../models/users';
+import UserRequest from '../types/UserRequest';
+import { firebaserules } from 'googleapis/build/src/apis/firebaserules';
 //checkUserExist
 //create oauthAccessToken
 export const createToken = async (userId: ObjectId, day: number) => {
@@ -41,7 +44,7 @@ const extractDays = (expiresIn: string) => {
 };
 //isAuth
 export const isAuth = async (
-  req: Request,
+  req: UserRequest,
   res: Response,
   next: NextFunction,
 ) => {
@@ -55,5 +58,28 @@ export const isAuth = async (
 
   if (!token) {
     return appErrorService(401, 'unauthenticated', next);
+  }
+
+  try {
+    const decoded: {
+      id: string;
+      oauthTokenId: string;
+    } = await new Promise((resolve, reject) => {
+      jwt.verify(token!, process.env.JWT_SECRET!);
+    });
+    const currentUser = await User.findById(decoded.id);
+    const oauthToken = await OauthAccessToken.findOne({
+      id: decoded.oauthTokenId,
+      user: decoded.id,
+      isRevoked: false,
+    });
+    if (currentUser && oauthToken) {
+      req.user = { id: currentUser.id };
+      next();
+    } else {
+      return appErrorService(401, 'unauthenticated', next);
+    }
+  } catch (err) {
+    return appErrorService(400, (err as Error).message, next);
   }
 };
