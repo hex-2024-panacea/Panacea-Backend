@@ -1,0 +1,849 @@
+openapi: 3.0.0
+info:
+  title: Panacea API service
+  version: 0.0.0
+tags:
+  - name: Auth
+paths:
+  /api/admin:
+    get:
+      operationId: Admin_get
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+  /api/auth/email-link/{userId}:
+    post:
+      tags:
+        - Auth
+      operationId: emailLink_list
+      summary: 寄送驗證信
+      description: 寄送驗證信
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: HTTP Status Code 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Api.Auth.emailLink.Data'
+        default:
+          description: HTTP Status Code 400
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General.Error'
+  /api/auth/register:
+    post:
+      tags:
+        - Auth
+      operationId: Register_register
+      summary: 註冊學員帳號
+      description: 註冊學員帳號
+      parameters: []
+      responses:
+        '200':
+          description: HTTP Status Code 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Api.Auth.Register.Data'
+        default:
+          description: HTTP Status Code 400
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+                - confirmPassword
+              properties:
+                name:
+                  type: string
+                  default: user
+                email:
+                  type: string
+                  default: user@gmail.com
+                password:
+                  type: string
+                  default: test1234
+                confirmPassword:
+                  type: string
+                  default: test1234
+  /api/auth/sign-in:
+    post:
+      tags:
+        - Auth
+      operationId: SignIn_signIn
+      summary: 登入
+      description: 登入
+      parameters: []
+      responses:
+        '200':
+          description: HTTP Status Code 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    type: string
+                    enum:
+                      - ''
+        default:
+          description: HTTP Status Code 400
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  default: user@gmail.com
+                password:
+                  type: string
+                  default: test1234
+  /api/auth/verify-mail:
+    post:
+      tags:
+        - Auth
+      operationId: VerifyMail_verifyMail
+      summary: 寄送驗證信
+      description: 寄送驗證信
+      parameters: []
+      responses:
+        '200':
+          description: HTTP Status Code 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Api.Auth.VerifyMail.Data'
+        default:
+          description: HTTP Status Code 400
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/General.Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Api.Auth.VerifyMail.Body'
+  /api/notifications:
+    get:
+      operationId: Notification_listNotifications
+      description: 取得訊息
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    type: string
+                    enum:
+                      - ''
+    post:
+      operationId: Notification_readNotifications
+      description: 已讀訊息
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    type: string
+                    enum:
+                      - ''
+  /api/notifications/read-all:
+    post:
+      operationId: Notification_readAll
+      description: 已讀全部訊息
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    type: string
+                    enum:
+                      - ''
+  /api/ping:
+    get:
+      operationId: Ping_ping
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    type: string
+  /api/upload/image:
+    post:
+      operationId: Image_uploadImage
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Api.Upload.Image.Data'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: byte
+  /api/users:
+    get:
+      operationId: User_listUsers
+      description: 取得使用者列表
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    type: string
+                    enum:
+                      - ''
+    put:
+      operationId: User_updateUser
+      description: 更新使用者資訊
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    type: string
+                    enum:
+                      - ''
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+  /api/users/{id}:
+    get:
+      operationId: User_getUser
+      description: 取得使用者資訊
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    type: string
+                    enum:
+                      - ''
+    delete:
+      operationId: User_deleteUser
+      description: 刪除使用者
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - '200'
+                  message:
+                    type: string
+                  data:
+                    type: string
+                    enum:
+                      - ''
+security:
+  - BearerAuth: []
+components:
+  schemas:
+    Api.Auth.Register.Body:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - confirmPassword
+      properties:
+        name:
+          type: string
+          default: user
+        email:
+          type: string
+          default: user@gmail.com
+        password:
+          type: string
+          default: test1234
+        confirmPassword:
+          type: string
+          default: test1234
+    Api.Auth.Register.Data:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          default: email is sent
+    Api.Auth.SignIn.Body:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          default: user@gmail.com
+        password:
+          type: string
+          default: test1234
+    Api.Auth.VerifyMail.Body:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          default: user@gmail.com
+    Api.Auth.VerifyMail.Data:
+      type: object
+      required:
+        - result
+      properties:
+        result:
+          type: string
+    Api.Auth.emailLink.Body:
+      type: object
+      required:
+        - email
+        - expires
+        - signature
+      properties:
+        email:
+          type: string
+          default: user@gmail.com
+        expires:
+          type: string
+        signature:
+          type: string
+    Api.Auth.emailLink.Data:
+      type: object
+      required:
+        - result
+      properties:
+        result:
+          type: string
+    Api.Upload.Image.Body:
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: byte
+      description: Upload image asset
+    Api.Upload.Image.Data:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+    General.Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - '400'
+        message:
+          type: string
+    General.ResponseCode:
+      type: string
+      enum:
+        - '200'
+        - '10002'
+        - '20001'
+        - '400'
+        - '50001'
+    Model.Coach:
+      type: object
+      required:
+        - userId
+        - firstName
+        - lastName
+        - birthday
+        - occupation
+        - profession
+        - professionSpecialist
+        - auditStatus
+        - languages
+        - introduction
+        - bankCode
+        - bankAccountName
+        - bankAccountNumber
+        - submitAuditAt
+        - AuditedAt
+        - createdAt
+        - updatedAt
+      properties:
+        userId:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        birthday:
+          type: string
+          format: date
+        occupation:
+          type: string
+          enum:
+            - Nutritionist
+            - Counselor
+        profession:
+          type: string
+          enum:
+            - Workout
+            - Consult
+        professionSpecialist:
+          type: string
+        auditStatus:
+          type: string
+          enum:
+            - WAITING
+            - REVIEWING
+            - VERIFIED
+        languages:
+          type: array
+          items: {}
+        introduction:
+          type: string
+        bankCode:
+          type: string
+        bankAccountName:
+          type: string
+        bankAccountNumber:
+          type: string
+        submitAuditAt:
+          type: string
+          format: date
+        AuditedAt:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
+    Model.Course:
+      type: object
+      required:
+        - userId
+        - name
+        - category
+        - fullIntroduction
+        - auditStatus
+        - startDate
+        - endDate
+        - datePeriod
+        - priceSet
+        - totalPeriodCount
+        - remainPeriodCount
+        - acceptAppointment
+        - createdAt
+        - updatedAt
+        - deletedAt
+      properties:
+        userId:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+          enum:
+            - fitness
+        shortIntroduction:
+          type: string
+        fullIntroduction:
+          type: string
+        bannerImage:
+          type: string
+          format: uri
+        thumbnailImage:
+          type: string
+          format: uri
+        auditStatus:
+          type: string
+          enum:
+            - WAITING
+            - VERIFIED
+            - AUDITED
+            - CLOSED
+            - BANNED
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        datePeriod:
+          type: array
+          items: {}
+        priceSet:
+          type: array
+          items: {}
+        totalPeriodCount:
+          type: integer
+        remainPeriodCount:
+          type: integer
+        acceptAppointment:
+          type: boolean
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
+        deletedAt:
+          type: string
+          format: date
+    Model.CourseAppointment:
+      type: object
+      required:
+        - userId
+        - coachId
+        - classId
+        - takeStatus
+        - date
+      properties:
+        userId:
+          type: integer
+        coachId:
+          type: integer
+        classId:
+          type: integer
+        takeStatus:
+          type: string
+          enum:
+            - WAITING
+            - ONGOING
+            - TAKEN
+            - CANCEL
+        date:
+          type: string
+          format: date
+    Model.Notification:
+      type: object
+      required:
+        - userId
+        - type
+        - title
+        - content
+        - link
+        - createdAt
+        - readAt
+      properties:
+        userId:
+          type: integer
+        type:
+          type: string
+          enum:
+            - system
+            - message
+        title:
+          type: string
+        content:
+          type: string
+        link:
+          type: string
+        createdAt:
+          type: string
+          format: date
+        readAt:
+          type: string
+          format: date
+    Model.Order:
+      type: object
+      required:
+        - buyerId
+        - currency
+        - amount
+        - paymentMethod
+        - paidAt
+        - cancelAt
+        - purchasedAt
+        - createdAt
+      properties:
+        buyerId:
+          type: integer
+        currency:
+          type: string
+        amount:
+          type: integer
+        paymentMethod:
+          type: string
+          enum:
+            - credit
+        paidAt:
+          type: string
+          format: date
+        cancelAt:
+          type: string
+          format: date
+        purchasedAt:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date
+    Model.User:
+      type: object
+      required:
+        - name
+        - username
+        - password
+        - email
+        - ssoType
+        - ssoToken
+        - accessToken
+        - emailVerifiedAt
+        - sendVerifyMailAt
+        - createdAt
+        - updatedAt
+        - deletedAt
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        ssoType:
+          type: string
+        ssoToken:
+          type: string
+        accessToken:
+          type: string
+        emailVerifiedAt:
+          type: string
+          format: date
+        sendVerifyMailAt:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
+        deletedAt:
+          type: string
+          format: date
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+servers:
+  - url: https://panacea-api.zeabur.app
+    description: test server
+    variables: {}

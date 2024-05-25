@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import path from 'path';
 import handleSuccess from './handleSuccess';
 import { Response } from 'express';
-import { temporaraySignature } from './signature';
+import { temporarySignature } from './signature';
 import { google } from 'googleapis';
 const OAuth2 = google.auth.OAuth2;
 // const exphbs = require('express-handlebars');
@@ -58,9 +58,9 @@ export const sendMail = async (options: object, res: Response) => {
 };
 
 export const registerMailSend = async (email: string, userId: string, res: Response) => {
-  //webUrl 改成前端的 pageUrl 加上 temporarayUrl 的 expires,signature,userId
+  //webUrl 改成前端的 pageUrl 加上 temporaryUrl 的 expires,signature,userId
   const verifyUrl = `/api/auth/email-link/${userId}`;
-  const signatureOb = temporaraySignature(verifyUrl, 60, { userId: userId });
+  const signatureOb = temporarySignature(verifyUrl, 60, { userId: userId });
 
   const { expires, signature } = signatureOb;
   const webUrl = `${process.env.FRONTEND_URL}/verify/email/${userId}?expires=${expires}&signature=${signature}`;
@@ -83,9 +83,9 @@ export const registerMailSend = async (email: string, userId: string, res: Respo
 };
 
 export const forgetPasswordSend = async (email: string, userId: string, res: Response) => {
-  //url 改成前端的 pageUrl 加上 temporarayUrl 的 expires,signature,userId
+  //url 改成前端的 pageUrl 加上 temporaryUrl 的 expires,signature,userId
   const url = `/api/auth/reset-password/${userId}`;
-  const signatureOb = temporaraySignature(url, 60, { userId: userId });
+  const signatureOb = temporarySignature(url, 60, { userId: userId });
 
   const { expires, signature } = signatureOb;
   const webUrl = `${process.env.FRONTEND_URL}/forget-passowrd/${userId}?expires=${expires}&signature=${signature}`;

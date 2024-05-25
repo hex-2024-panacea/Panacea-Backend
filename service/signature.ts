@@ -31,7 +31,7 @@ export const verifySignature = (
   return signature === expectedSignature;
 };
 
-export const temporaraySignature = (apiUrl: string, min: number, params: Dict<string | number | boolean>) => {
+export const temporarySignature = (apiUrl: string, min: number, params: Dict<string | number | boolean>) => {
   const expiry = Date.now() + min * 60 * 1000;
   const secretKey = process.env.SIGNATURE_KEY!;
   const signature = generateSignature(apiUrl, params, expiry.toString(), secretKey);

@@ -1,7 +1,6 @@
 const swaggerAutogen = require('swagger-autogen')();
 const dotenv = require('dotenv');
 
-require('dotenv').config();
 dotenv.config({ path: './.env' });
 
 const doc = {
@@ -10,7 +9,20 @@ const doc = {
     description: '後端 API 文件',
   },
   host: process.env.host,
-  schema: ['http', 'https'],
+  schemas: ['http', 'https'],
+  schemes: ['http', 'https'],
+  tags: [
+    {
+      name: 'Auth',
+      description: 'Authentication endpoints',
+    },
+  ],
+  securityDefinitions: {
+    Bearer: {
+      type: 'apiKey',
+      in: 'header',
+    },
+  },
 };
 
 const outputFile = './swagger-output.json';

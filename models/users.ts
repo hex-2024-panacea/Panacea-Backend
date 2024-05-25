@@ -17,10 +17,13 @@ const schema = new mongoose.Schema({
   },
   email: {
     type: String,
+    trim: true,
+    unique: true,
     requried: [true, '信箱必填'],
   },
   password: {
     type: String,
+    trim: true,
     requried: [true, '密碼必填'],
   },
   avatar: {

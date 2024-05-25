@@ -5,14 +5,17 @@
   "node": ">= 6.13.0",
   "scripts": {
     "start:test": "node swagger.js && node ./dist/bin/www",
-    "start": "node swagger.js && nodemon ./bin/www.ts",
-    "start:dev": "cross-env NODE_ENV=dev nodemon --exec ts-node ./bin/www.ts",
+    "start": "tsp compile ./spec/main.tsp --output-dir ./spec && nodemon ./bin/www.ts",
+    "start:dev": "tsp compile ./spec/main.tsp --output-dir ./spec && ts-node ./bin/www.ts",
     "start:pro": "tsc && cross-env NODE_ENV=pro nodemon ./dist/bin/www",
     "lint": "eslint .",
     "generate-swagger": "node swagger.js",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "typespec": "tsp compile ./spec/main.tsp --output-dir ./spec --watch"
   },
   "dependencies": {
+    "@typespec/openapi": "^0.56.0",
+    "@typespec/openapi3": "^0.56.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "~1.4.4",
     "cross-env": "^7.0.3",
@@ -30,6 +33,7 @@
     "nodemailer-express-handlebars": "^6.1.2",
     "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.0",
+    "yaml": "^2.4.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -45,6 +49,10 @@
     "@types/nodemailer": "^6.4.15",
     "@types/nodemailer-express-handlebars": "^4.0.5",
     "@types/swagger-ui-express": "^4.1.6",
+    "@typespec/compiler": "^0.56.0",
+    "@typespec/http": "^0.56.0",
+    "@typespec/rest": "^0.56.0",
+    "@typespec/versioning": "^0.56.0",
     "eslint": "^8.57.0",
     "eslint-plugin-typescript": "^0.14.0",
     "globals": "^15.2.0",

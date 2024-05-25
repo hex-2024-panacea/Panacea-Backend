@@ -13,11 +13,12 @@ import apiLimiter from './service/rateLimit';
 import usersRouter from './routes/users';
 //env
 import dotenv from 'dotenv';
+const app = express();
+const fs = require('fs');
+const YAML = require('yaml');
+const file = fs.readFileSync('./spec/@typespec/openapi3/openapi.yaml', 'utf8');
+const swaggerDocument = YAML.parse(file);
 dotenv.config({ path: './.env' });
-
-const rootDir = process.cwd();
-const swaggerFilePath = path.join(rootDir, 'swagger-output.json');
-const swaggerFile = require(swaggerFilePath);
 
 //mongoose
 const DB = process.env.DATABASE!.replace('<password>', process.env.DATABASE_PASSWORD!);
@@ -30,8 +31,6 @@ mongoose
     console.log(err, '資料庫連線異常');
   });
 
-const app = express();
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -42,7 +41,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api', apiLimiter);
 //route
 app.use('/', usersRouter);
-app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerFile));
+app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 //404
 app.use(function (req: Request, res: Response, next: NextFunction) {
   appErrorService(404, '找不到路徑', next);
