@@ -5,8 +5,8 @@
   "node": ">= 6.13.0",
   "scripts": {
     "start:test": "node swagger.js && node ./dist/bin/www",
-    "start": "tsp compile ./spec/main.tsp --output-dir ./spec && nodemon ./bin/www.ts",
-    "start:dev": "tsp compile ./spec/main.tsp --output-dir ./spec && ts-node ./bin/www.ts",
+    "start": "tsp compile ./spec/main.tsp --output-dir ./spec && ts-node ./bin/www.ts",
+    "start:dev": "tsp compile ./spec/main.tsp --output-dir ./spec && nodemon ./bin/www.ts",
     "start:pro": "tsc && cross-env NODE_ENV=pro nodemon ./dist/bin/www",
     "lint": "eslint .",
     "generate-swagger": "node swagger.js",
