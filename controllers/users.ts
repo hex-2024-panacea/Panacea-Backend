@@ -40,7 +40,11 @@ export const signIn = handleErrorAsync(async (req, res, next) => {
   const isMatch = await bcrypt.compare(password, user!.password as string);
   if (user && isMatch) {
     //產生 token
-    generateJwtSend(user.id, res);
+    if(!user.emailVerifiedAt){
+      await registerMailSend(email, user.id, res);
+    }else{
+      generateJwtSend(user.id, res);
+    }
   } else {
     appErrorService(400, 'email or password is not correct', next);
   }
