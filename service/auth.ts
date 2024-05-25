@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import { Request, Response, NextFunction } from 'express';
 import appErrorService from './appErrorService';
 import handleSuccess from './handleSuccess';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import OauthAccessToken from '../models/oauthAccessToken';
 import User from '../models/users';
 import UserRequest from '../types/UserRequest';
@@ -42,11 +42,7 @@ const extractDays = (expiresIn: string) => {
   return match ? parseInt(match[1], 10) : 7;
 };
 //isAuth
-export const isAuth = async (
-  req: UserRequest,
-  res: Response,
-  next: NextFunction,
-) => {
+export const isAuth = async (req: UserRequest,res: Response,next: NextFunction) => {
   let token;
   if (
     req.headers.authorization &&
@@ -58,17 +54,12 @@ export const isAuth = async (
   if (!token) {
     return appErrorService(401, 'unauthenticated', next);
   }
-
+  
   try {
-    const decoded: {
-      id: string;
-      oauthTokenId: string;
-    } = await new Promise((resolve, reject) => {
-      jwt.verify(token!, process.env.JWT_SECRET!);
-    });
+    const decoded = jwt.verify(token!, process.env.JWT_SECRET!) as JwtPayload;
     const currentUser = await User.findById(decoded.id);
     const oauthToken = await OauthAccessToken.findOne({
-      id: decoded.oauthTokenId,
+      _id: decoded.oauthTokenId,
       user: decoded.id,
       isRevoked: false,
     });
