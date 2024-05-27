@@ -11,6 +11,7 @@ import swaggerUI from 'swagger-ui-express';
 import apiLimiter from './service/rateLimit';
 //router
 import usersRouter from './routes/users';
+import uploadRouter from './routes/upload';
 //env
 import dotenv from 'dotenv';
 const app = express();
@@ -23,7 +24,7 @@ dotenv.config({ path: './.env' });
 //mongoose
 const DB = process.env.DATABASE!.replace('<password>', process.env.DATABASE_PASSWORD!);
 mongoose
-  .connect(DB)
+  .connect('mongodb+srv://pp840405:Pp600721@cluster0.ri7wpxp.mongodb.net/')
   .then(() => {
     console.log('資料庫連線成功');
   })
@@ -41,6 +42,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api', apiLimiter);
 //route
 app.use('/', usersRouter);
+app.use('/', uploadRouter);
 app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 //404
 app.use(function (req: Request, res: Response, next: NextFunction) {
