@@ -24,7 +24,7 @@ dotenv.config({ path: './.env' });
 //mongoose
 const DB = process.env.DATABASE!.replace('<password>', process.env.DATABASE_PASSWORD!);
 mongoose
-  .connect('mongodb+srv://pp840405:Pp600721@cluster0.ri7wpxp.mongodb.net/')
+  .connect(DB)
   .then(() => {
     console.log('資料庫連線成功');
   })
