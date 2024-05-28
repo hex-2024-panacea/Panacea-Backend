@@ -11,7 +11,7 @@ import {
   verifyEmailZod,
   resetPasswordZod,
   updatePasswordZod,
-  registerCocahZod,
+  registerCoachZod,
 } from '../zods/users';
 const USER =
   '-password -subject -specialty -language -workExperience -education -certifiedDocuments -bankName -bankCode -bankAccount -actualAmount -earnings -approvalStatus';
@@ -201,7 +201,7 @@ export const applyCoach = handleErrorAsync(async (req, res, next) => {
     return appErrorService(403, 'you are already a coach', next);
   }
   try {
-    registerCocahZod.parse(req.body);
+    registerCoachZod.parse(req.body);
     const updatedAt = new Date();
 
     await UserModel.findByIdAndUpdate(

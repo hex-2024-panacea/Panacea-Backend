@@ -13,7 +13,7 @@ export const registerZod = z
     path: ['confirmPassword'],
   });
 
-export const registerCocahZod = z.object({
+export const registerCoachZod = z.object({
   subject: z.string(),
   specialty: z.string(),
   language: z.array(z.object({ speakLanguage: z.string(), languageLevel: z.string() })),
