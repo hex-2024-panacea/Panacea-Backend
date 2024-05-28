@@ -1,11 +1,11 @@
 import { ObjectId } from 'mongodb';
-import { Request, Response, NextFunction } from 'express';
+import type { Response, NextFunction } from 'express';
 import appErrorService from './appErrorService';
 import handleSuccess from './handleSuccess';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt, { type JwtPayload } from 'jsonwebtoken';
 import OauthAccessToken from '../models/oauthAccessToken';
-import User from '../models/users';
-import UserRequest from '../types/UserRequest';
+import { UserModel } from '../models/users';
+import type UserRequest from '../types/UserRequest';
 //checkUserExist
 //create oauthAccessToken
 export const createToken = async (userId: ObjectId, day: number) => {
@@ -42,30 +42,27 @@ const extractDays = (expiresIn: string) => {
   return match ? parseInt(match[1], 10) : 7;
 };
 //isAuth
-export const isAuth = async (req: UserRequest,res: Response,next: NextFunction) => {
+export const isAuth = async (req: UserRequest, res: Response, next: NextFunction) => {
   let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
   }
 
   if (!token) {
     return appErrorService(401, 'unauthenticated', next);
   }
-  
+
   try {
     const decoded = jwt.verify(token!, process.env.JWT_SECRET!) as JwtPayload;
-    const currentUser = await User.findById(decoded.id);
+    const currentUser = await UserModel.findById(decoded.id);
     const oauthToken = await OauthAccessToken.findOne({
       _id: decoded.oauthTokenId,
       user: decoded.id,
       isRevoked: false,
     });
     if (currentUser && oauthToken) {
-      req.user = { id: currentUser.id };
-      next();
+      req.user = { id: currentUser.id, isCoach: currentUser.isCoach };
+      return next();
     } else {
       return appErrorService(401, 'unauthenticated', next);
     }

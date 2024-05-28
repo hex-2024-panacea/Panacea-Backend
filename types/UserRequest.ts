@@ -2,6 +2,7 @@ import type { Request } from 'express';
 
 interface User {
   id: string;
+  isCoach?: boolean;
 }
 
 interface UserRequest extends Request {
