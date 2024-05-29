@@ -10,7 +10,7 @@ import {
   userInfo,
   userUpdate,
   updatePassword,
-} from '../controllers/users.controller';
+} from '../controllers/user.controller';
 import { signedMiddleware } from '../service/signature';
 import throttle from '../service/throttle';
 import { isAuth } from '../service/auth';
