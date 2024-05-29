@@ -29,6 +29,6 @@ const schema = new mongoose.Schema({
   },
 });
 
-const OauthAccessToken = mongoose.model('OauthAccessToken', schema);
+const OauthAccessTokenModel = mongoose.model('OauthAccessToken', schema);
 
-export default OauthAccessToken;
+export default OauthAccessTokenModel;

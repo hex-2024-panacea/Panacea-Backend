@@ -4,7 +4,7 @@ import { UserModel } from '../models/users';
 import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { registerMailSend, forgetPasswordSend } from '../service/mail';
-import { generateJwtSend } from '../service/auth';
+import { generateJwtSend, revokeToken} from '../service/auth';
 import {
   registerZod,
   signinZod,
@@ -127,6 +127,7 @@ export const resetPassword = handleErrorAsync(async (req, res, next) => {
     }
   );
   if (user) {
+    await revokeToken(user.id);
     handleSuccess(res, 200, 'password reset');
   } else {
     return appErrorService(400, '發生錯誤', next);
@@ -153,6 +154,7 @@ export const updatePassword = handleErrorAsync(async (req, res, next) => {
           updatedAt,
         }
       );
+      await revokeToken(_id!);
       handleSuccess(res, 200, 'password update.');
     } else {
       return appErrorService(400, '發生錯誤', next);

@@ -3,13 +3,13 @@ import type { Response, NextFunction } from 'express';
 import appErrorService from './appErrorService';
 import handleSuccess from './handleSuccess';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
-import OauthAccessToken from '../models/oauthAccessToken';
+import OauthAccessTokenModel from '../models/oauthAccessToken';
 import { UserModel } from '../models/users';
 import type UserRequest from '../types/UserRequest';
 //checkUserExist
 //create oauthAccessToken
 export const createToken = async (userId: ObjectId, day: number) => {
-  const accessToken = await OauthAccessToken.create({
+  const accessToken = await OauthAccessTokenModel.create({
     user: userId,
     name: 'PersonalAccessToken',
     expiresAt: new Date(Date.now() + day * 24 * 3600 * 1000),
@@ -55,7 +55,7 @@ export const isAuth = async (req: UserRequest, res: Response, next: NextFunction
   try {
     const decoded = jwt.verify(token!, process.env.JWT_SECRET!) as JwtPayload;
     const currentUser = await UserModel.findById(decoded.id);
-    const oauthToken = await OauthAccessToken.findOne({
+    const oauthToken = await OauthAccessTokenModel.findOne({
       _id: decoded.oauthTokenId,
       user: decoded.id,
       isRevoked: false,
@@ -70,3 +70,12 @@ export const isAuth = async (req: UserRequest, res: Response, next: NextFunction
     return appErrorService(400, (err as Error).message, next);
   }
 };
+//revoked access token
+export const revokeToken = async(userId: string)=>{
+  await OauthAccessTokenModel.updateMany({
+    user:userId,
+    isRevoked:false
+  },{
+    isRevoked:true
+  });
+}
