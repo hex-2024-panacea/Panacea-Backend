@@ -10,7 +10,7 @@ import { resErrorProd, resErrorDev } from './service/resError';
 import swaggerUI from 'swagger-ui-express';
 import apiLimiter from './service/rateLimit';
 //router
-import usersRouter from './routes/users';
+import usersRouter from './routes/user.route';
 import uploadRouter from './routes/upload';
 import coachRouter from './routes/coach.route';
 //env
