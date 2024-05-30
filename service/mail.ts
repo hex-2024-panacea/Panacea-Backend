@@ -3,8 +3,7 @@ import path from 'path';
 import handleSuccess from './handleSuccess';
 import { Response } from 'express';
 import { temporarySignature } from './signature';
-import { google } from 'googleapis';
-const OAuth2 = google.auth.OAuth2;
+import { OAuth2Client } from 'google-auth-library';
 // const exphbs = require('express-handlebars');
 const nodemailerHandlebars = require('nodemailer-express-handlebars');
 
@@ -15,7 +14,7 @@ export const sendMail = async (options: object, res: Response) => {
   const GOOGLE_AUTH_CLIENT_SECRET = process.env.GOOGLE_AUTH_CLIENT_SECRET;
   const GOOGLE_AUTH_REFRESH_TOKEN = process.env.GOOGLE_AUTH_REFRESH_TOKEN;
 
-  const oauth2Client = new OAuth2(
+  const oauth2Client = new OAuth2Client(
     GOOGLE_AUTH_CLIENTID,
     GOOGLE_AUTH_CLIENT_SECRET,
     'https://developers.google.com/oauthplayground'
