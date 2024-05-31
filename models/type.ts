@@ -44,3 +44,56 @@ export interface IUser extends Document {
   approvalStatus: 'pending' | 'success' | 'fail';
   reason: string;
 }
+export interface ICourse extends Document {
+  createdAt: Date;
+  updatedAt: Date;
+  coach:string;
+  name: string;
+  coverImage: string;
+  description: string;
+  category: string[];
+  subCategory: string[];
+  startDate: Date;
+  isActive:boolean;
+  approvalStatus: 'pending' | 'success' | 'failed';
+  reason:string;
+  rating:Number;
+}
+export interface ICoursePrice extends Document {
+  createdAt: Date;
+  updatedAt: Date;
+  course: string;
+  count: Number;
+  price: Number;
+}
+export interface ICourseSchedule extends Document {
+  createdAt: Date;
+  updatedAt: Date;
+  course: string;
+  coach: string;
+  startTime: Date;
+  endTime: Date;
+  isBooked: boolean;
+}
+export interface IBookingCourse extends Document {
+  createdAt: Date;
+  updatedAt: Date;
+  user: string;
+  course: string;
+  coach: string;
+  courseSchedule: string;
+  meetingUrl: string;
+  order: string;
+  isCanceled:boolean;
+  userCancelReason: string;
+  coachCancelReason: string;
+}
+export interface ICourseComment extends Document {
+  createdAt: Date;
+  updatedAt: Date;
+  user: string;
+  course: string;
+  bookingCourse:string;
+  content:string;
+  rating:Number;
+}
