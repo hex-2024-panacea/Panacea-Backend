@@ -4,7 +4,7 @@ import { UserModel } from '../models/users';
 import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { registerMailSend, forgetPasswordSend } from '../service/mail';
-import { generateJwtSend, revokeToken} from '../service/auth';
+import { generateJwtSend, revokeToken } from '../service/auth';
 import {
   registerZod,
   signinZod,
@@ -218,6 +218,7 @@ export const applyCoach = handleErrorAsync(async (req, res, next) => {
           education,
           certifiedDocuments,
           updatedAt,
+          approvalStatus: 'pending',
         },
       },
       { runValidators: true, new: true }
