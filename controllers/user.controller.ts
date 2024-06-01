@@ -4,7 +4,7 @@ import { UserModel } from '../models/users';
 import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { registerMailSend, forgetPasswordSend } from '../service/mail';
-import { generateJwtSend, revokeToken} from '../service/auth';
+import { generateJwtSend, revokeToken } from '../service/auth';
 import {
   registerZod,
   signinZod,
@@ -42,7 +42,7 @@ export const register = handleErrorAsync(async (req, res, next) => {
 
 //登入
 export const signIn = handleErrorAsync(async (req, res, next) => {
-  let { email, password } = req.body;
+  const { email, password } = req.body;
   signinZod.parse({ email, password });
 
   const user = await UserModel.findOne({ email });
@@ -143,7 +143,7 @@ export const updatePassword = handleErrorAsync(async (req, res, next) => {
     const currentUser = await UserModel.findById(_id);
     const isMatch = await bcrypt.compare(password, currentUser!.password as string);
     if (isMatch) {
-      const updatedAt = new Date();
+      const updatedAt = Date.now();
       const updatePassword = await bcrypt.hash(newPassword, 12);
       await UserModel.findByIdAndUpdate(
         {
@@ -166,7 +166,7 @@ export const updatePassword = handleErrorAsync(async (req, res, next) => {
 // 更新使用者資訊
 export const userUpdate = handleErrorAsync(async (req, res, next) => {
   const { name, avatar } = req.body;
-  const updatedAt = new Date();
+  const updatedAt = Date.now();
   const updateFields = { name, avatar, updatedAt };
   const _id = req.user?.id;
   const isCoach = req.user?.isCoach;
@@ -196,7 +196,7 @@ export const userInfo = handleErrorAsync(async (req, res, next) => {
 
 //註冊教練
 export const applyCoach = handleErrorAsync(async (req, res, next) => {
-  let { subject, specialty, language, workExperience, education, certifiedDocuments } = req.body;
+  const { subject, specialty, language, workExperience, education, certifiedDocuments } = req.body;
   const _id = req.user?.id;
   const isCoach = req.user?.isCoach;
   if (isCoach) {
@@ -204,7 +204,7 @@ export const applyCoach = handleErrorAsync(async (req, res, next) => {
   }
   try {
     registerCoachZod.parse(req.body);
-    const updatedAt = new Date();
+    const updatedAt = Date.now();
 
     await UserModel.findByIdAndUpdate(
       _id,
