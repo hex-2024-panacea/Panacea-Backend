@@ -1,4 +1,4 @@
-import type { Document } from 'mongoose';
+import type { Document , ObjectId } from 'mongoose';
 export interface IUser extends Document {
   createdAt: Date;
   updatedAt: Date;
@@ -47,7 +47,7 @@ export interface IUser extends Document {
 export interface ICourse extends Document {
   createdAt: Date;
   updatedAt: Date;
-  coach:string;
+  coach:ObjectId;
   name: string;
   coverImage: string;
   description: string;
@@ -62,15 +62,15 @@ export interface ICourse extends Document {
 export interface ICoursePrice extends Document {
   createdAt: Date;
   updatedAt: Date;
-  course: string;
+  course: ObjectId;
   count: Number;
   price: Number;
 }
 export interface ICourseSchedule extends Document {
   createdAt: Date;
   updatedAt: Date;
-  course: string;
-  coach: string;
+  course: ObjectId;
+  coach: ObjectId;
   startTime: Date;
   endTime: Date;
   isBooked: boolean;
@@ -78,12 +78,12 @@ export interface ICourseSchedule extends Document {
 export interface IBookingCourse extends Document {
   createdAt: Date;
   updatedAt: Date;
-  user: string;
-  course: string;
-  coach: string;
-  courseSchedule: string;
+  user: ObjectId;
+  course: ObjectId;
+  coach: ObjectId;
+  courseSchedule: ObjectId;
   meetingUrl: string;
-  order: string;
+  order: ObjectId;
   isCanceled:boolean;
   userCancelReason: string;
   coachCancelReason: string;
@@ -91,9 +91,9 @@ export interface IBookingCourse extends Document {
 export interface ICourseComment extends Document {
   createdAt: Date;
   updatedAt: Date;
-  user: string;
-  course: string;
-  bookingCourse:string;
+  user: ObjectId;
+  course: ObjectId;
+  bookingCourse:ObjectId;
   content:string;
-  rating:Number;
+  rating:Number
 }
