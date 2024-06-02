@@ -87,7 +87,7 @@ export const forgetPasswordSend = async (email: string, userId: string, res: Res
   const signatureOb = temporarySignature(url, 60, { userId: userId });
 
   const { expires, signature } = signatureOb;
-  const webUrl = `${process.env.FRONTEND_URL}/reset-password?userId=${userId}expires=${expires}&signature=${signature}`;
+  const webUrl = `${process.env.FRONTEND_URL}/reset-password?userId=${userId}&expires=${expires}&signature=${signature}`;
 
   let mailOptions = {
     from: mailSender,
