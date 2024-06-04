@@ -36,3 +36,8 @@ export const adminUpdateCoachInfoZod = z.object({
     .regex(bankCodeRegex, { message: 'Bank code must not contain special characters.' })
     .optional(),
 });
+
+export const adminReviewCoachZod = z.object({
+  approvalStatus: z.enum(['success', 'pending', 'fail']),
+  reason: z.string().optional(),
+});

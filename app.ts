@@ -13,6 +13,7 @@ import apiLimiter from './service/rateLimit';
 import usersRouter from './routes/user.route';
 import uploadRouter from './routes/upload';
 import coachRouter from './routes/coach.route';
+import adminRouter from './routes/admin.route';
 //env
 import dotenv from 'dotenv';
 const app = express();
@@ -45,6 +46,7 @@ app.use('/api', apiLimiter);
 app.use('/', usersRouter);
 app.use('/', uploadRouter);
 app.use('/', coachRouter);
+app.use('/', adminRouter);
 app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 //404
 app.use(function (req: Request, res: Response, next: NextFunction) {
