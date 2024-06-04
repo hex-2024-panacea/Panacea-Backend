@@ -18,7 +18,7 @@ const CourseSchema = new mongoose.Schema<ICourse>({
   },
   coach: {
     type: mongoose.Schema.ObjectId,
-    ref: 'user',
+    ref: 'User',
     required: [true, 'user ID 必填'],
   },
   coverImage: {
@@ -58,6 +58,12 @@ const CourseSchema = new mongoose.Schema<ICourse>({
     type: Number,
     dafault:0
   },
+});
+
+CourseSchema.virtual('prices', {
+  ref: 'CoursePrice',
+  localField: '_id',
+  foreignField: 'course',
 });
 
 export const CourseModel = mongoose.model('Course',CourseSchema);

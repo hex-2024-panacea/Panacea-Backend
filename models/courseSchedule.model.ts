@@ -14,12 +14,12 @@ const CourseScheduleSchema = new mongoose.Schema<ICourseSchedule>({
   },
   coach: {
     type: mongoose.Schema.ObjectId,
-    ref: 'user',
+    ref: 'User',
     required: [true, 'user ID 必填'],
   },
   course: {
     type: mongoose.Schema.ObjectId,
-    ref: 'course',
+    ref: 'Course',
     required: [true, 'course ID 必填'],
   },
   startTime: {

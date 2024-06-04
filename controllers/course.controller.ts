@@ -82,6 +82,9 @@ export const editPrice = handleErrorAsync(async (req, res, next) => {
     });
   await CoursePriceModel.create(newPriceArr);
 
-  const course = await CourseModel.findById(courseId);
-  handleSuccess(res, 200, 'get data', course);
+  const prices = await CoursePriceModel.find({
+    course:courseId
+  });
+  handleSuccess(res, 200, 'get data', prices);
 });
+//教練取得課程

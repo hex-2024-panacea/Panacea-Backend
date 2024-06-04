@@ -14,7 +14,7 @@ const CoursePriceSchema = new mongoose.Schema<ICoursePrice>({
   },
   course: {
     type: mongoose.Schema.ObjectId,
-    ref: 'course',
+    ref: 'Course',
     required: [true, 'course ID 必填'],
   },
   count: {
