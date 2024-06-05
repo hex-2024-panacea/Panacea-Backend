@@ -91,7 +91,11 @@ export const editPrice = handleErrorAsync(async (req, res, next) => {
 //教練課程詳情頁
 export const coachGetCourse = handleErrorAsync(async (req, res, next) => {
   const courseId = req.params.courseId;
-  const course = await CourseModel.findById(courseId)
+  const userId = req.user?.id;
+  const course = await CourseModel.find({
+    course:courseId,
+    coach:userId
+     })
     .select('-coach')
     .populate({
       path: 'coursePrice',
