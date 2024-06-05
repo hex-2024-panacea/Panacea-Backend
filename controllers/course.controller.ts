@@ -1,4 +1,5 @@
 import handleErrorAsync from '../service/handleErrorAsync';
+import appErrorService from '../service/appErrorService';
 import { CourseModel } from '../models/course.model';
 import { createZod, editPriceZod } from '../zods/course.zod';
 import handleSuccess from '../service/handleSuccess';
@@ -83,8 +84,28 @@ export const editPrice = handleErrorAsync(async (req, res, next) => {
   await CoursePriceModel.create(newPriceArr);
 
   const prices = await CoursePriceModel.find({
-    course:courseId
+    course: courseId,
   });
   handleSuccess(res, 200, 'get data', prices);
 });
-//教練取得課程
+//教練課程詳情頁
+export const coachGetCourse = handleErrorAsync(async (req, res, next) => {
+  const courseId = req.params.courseId;
+  const course = await CourseModel.findById(courseId)
+    .select('-coach')
+    .populate({
+      path: 'coursePrice',
+      select: '_id -course count price',
+      options: {
+        sort: {
+          count: 1,
+          price: 1,
+        },
+      },
+    });
+  if (course) {
+    return handleSuccess(res, 200, 'get data', course);
+  } else {
+    return appErrorService(400, 'no data', next);
+  }
+});
