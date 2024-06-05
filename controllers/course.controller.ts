@@ -43,7 +43,13 @@ export const createCourse = handleErrorAsync(async (req, res, next) => {
   return handleSuccess(res, 200, '', course);
 });
 //建立編輯授課時間
-export const editSchedule = handleErrorAsync(async (req, res, next) => {});
+export const editSchedule = handleErrorAsync(async (req, res, next) => {
+  //用 start_time 排序 body 裡帶的 schedule
+  //delete 時間區間內，沒有被預約，且id沒有出現在body的schedule
+  //update 在 body 且有帶 id 的 schedule
+  //create 在 body 沒有帶 id 的 schedule
+  //查一下 mongo 可以做 unique 嗎
+});
 //建立編輯授課價格
 export const editPrice = handleErrorAsync(async (req, res, next) => {
   let { courseId } = req.params;
@@ -113,3 +119,4 @@ export const coachGetCourse = handleErrorAsync(async (req, res, next) => {
     return appErrorService(400, 'no data', next);
   }
 });
+//教練課程授課時間
