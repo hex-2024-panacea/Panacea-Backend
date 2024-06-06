@@ -41,6 +41,12 @@ const CourseScheduleSchema = new mongoose.Schema<ICourseSchedule>(
   },
 );
 
+CourseScheduleSchema.index(
+  { coach: 1, startTime: 1, endTime: 1 },{ unique: true });
+
+CourseScheduleSchema.index(
+  { course: 1, startTime: 1, endTime: 1 },{ unique: true });
+
 export const CourseScheduleModel = mongoose.model(
   'CourseSchedule',
   CourseScheduleSchema,

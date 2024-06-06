@@ -25,8 +25,6 @@ export const scheduleZod = z
   id: z.custom<ObjectId>().optional(),
   coach: z.custom<ObjectId>(),
   course: z.custom<ObjectId>(),
-  count: z.number(),
-  price: z.number(),
   startTime: z.string().datetime(),
   endTime: z.string().datetime(),
 });
