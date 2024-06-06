@@ -41,5 +41,6 @@ export interface IUser extends Document {
   bankAccount: string;
   earnings: Number;
   actualAmount: Number;
-  approvalStatus: 'pending' | 'success' | 'failed';
+  approvalStatus: 'pending' | 'success' | 'fail';
+  reason: string;
 }

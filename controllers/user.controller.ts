@@ -145,15 +145,10 @@ export const updatePassword = handleErrorAsync(async (req, res, next) => {
     if (isMatch) {
       const updatedAt = Date.now();
       const updatePassword = await bcrypt.hash(newPassword, 12);
-      await UserModel.findByIdAndUpdate(
-        {
-          _id,
-        },
-        {
-          password: updatePassword,
-          updatedAt,
-        }
-      );
+      await UserModel.findByIdAndUpdate(_id, {
+        password: updatePassword,
+        updatedAt,
+      });
       await revokeToken(_id!);
       handleSuccess(res, 200, 'password update.');
     } else {
