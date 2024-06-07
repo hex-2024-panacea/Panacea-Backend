@@ -78,18 +78,6 @@ export const isAuth = async (
     return appErrorService(400, (err as Error).message, next);
   }
 };
-//revoked access token
-export const revokeToken = async (userId: string) => {
-  await OauthAccessTokenModel.updateMany(
-    {
-      user: userId,
-      isRevoked: false,
-    },
-    {
-      isRevoked: true,
-    },
-  );
-};
 //isCoach
 export const isCoach = (
   req: UserRequest,
@@ -104,3 +92,26 @@ export const isCoach = (
   }
   return appErrorService(403, 'you are not a coach', next);
 };
+export const revokeAllToken = async(userId: string)=>{
+  await OauthAccessTokenModel.updateMany({
+    user:userId,
+    isRevoked:false
+  },{
+    isRevoked:true
+  });
+}
+//revoke oauthAccessToken
+export const revokeToken = async(req: UserRequest)=>{
+  const token = req.headers.authorization!.split(' ')[1];
+  const decoded = jwt.verify(token!, process.env.JWT_SECRET!) as JwtPayload;
+
+  const accessToken = await OauthAccessTokenModel.updateOne({
+    _id: decoded.oauthTokenId,
+    user: decoded.id,
+    isRevoked:false
+  },{
+    isRevoked:true
+  });
+
+  return accessToken;
+}
