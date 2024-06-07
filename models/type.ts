@@ -1,4 +1,4 @@
-import type { Document } from 'mongoose';
+import type { Document, ObjectId } from 'mongoose';
 export interface IUser extends Document {
   createdAt: Date;
   updatedAt: Date;
@@ -42,4 +42,12 @@ export interface IUser extends Document {
   earnings: Number;
   actualAmount: Number;
   approvalStatus: 'pending' | 'success' | 'failed';
+}
+
+export interface INotifications extends Document {
+  receiver: ObjectId;
+  title: string;
+  type: 'bookingSuccess' | 'classNotification';
+  status: 'seen' | 'active';
+  createdAt: Date;
 }

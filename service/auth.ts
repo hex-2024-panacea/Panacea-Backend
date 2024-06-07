@@ -71,11 +71,14 @@ export const isAuth = async (req: UserRequest, res: Response, next: NextFunction
   }
 };
 //revoked access token
-export const revokeToken = async(userId: string)=>{
-  await OauthAccessTokenModel.updateMany({
-    user:userId,
-    isRevoked:false
-  },{
-    isRevoked:true
-  });
-}
+export const revokeToken = async (userId: string) => {
+  await OauthAccessTokenModel.updateMany(
+    {
+      user: userId,
+      isRevoked: false,
+    },
+    {
+      isRevoked: true,
+    }
+  );
+};
