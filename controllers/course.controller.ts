@@ -171,3 +171,18 @@ export const coachGetCourse = handleErrorAsync(async (req, res, next) => {
     return appErrorService(400, 'no data', next);
   }
 });
+//教練刪除課程
+export const deleteCourse = handleErrorAsync(async (req, res, next) => {
+  const { courseId } = req.params;
+  const userId = req.user?.id;
+  //判斷是否有今天以後的預約課程 bookingSchedule，有的話不可刪除課程
+  const course = await CourseModel.findOneAndDelete({
+    course: courseId,
+    coach: userId
+  });
+  if(course){
+    //delete coursePrice,courseSchedule,bookingCourse
+  }else{
+    return appErrorService(400,'發生錯誤',next);
+  }
+});
