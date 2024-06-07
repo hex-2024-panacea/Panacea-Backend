@@ -6,6 +6,7 @@ import handleSuccess from '../service/handleSuccess';
 import CoursePrice from '../types/CoursePrice';
 import CourseSchedule from '../types/CourseSchedule';
 import { CoursePriceModel } from '../models/coursePrice.model';
+import { CourseScheduleModel } from '../models/courseSchedule.model';
 
 //建立課程
 export const createCourse = handleErrorAsync(async (req, res, next) => {
@@ -49,14 +50,57 @@ export const editSchedule = handleErrorAsync(async (req, res, next) => {
   const userId = req.user!.id;
   //用 start_time 排序 body 裡帶的 schedule
   let scheduleArr = req.body.schedule;
+  editScheduleZod.parse(scheduleArr);
   scheduleArr.sort((a: CourseSchedule, b: CourseSchedule) => {
     return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
   });
   //delete 時間區間內，沒有被預約，且id沒有出現在body的schedule
+  const existScheduleArr = scheduleArr.filter(
+    (schedule: CourseSchedule) => schedule.id,
+  );
+  const existIdArr = scheduleArr.map((schedule: CourseSchedule) => schedule.id);
+  await CourseScheduleModel.deleteMany({
+    _id: { $nin: existIdArr },
+    startTime: { $gte: new Date(scheduleArr[0].startTime) },
+    endTime: { $lte: new Date(scheduleArr.slice(-1)[0].endTime) },
+    course: courseId,
+    coach: userId,
+    isBooked: false,
+  });
   //update 在 body 且有帶 id 的 schedule
+  const updateArr = existScheduleArr.map((schedule: CourseSchedule) => {
+    return {
+      updateOne: {
+        filter: {
+          _id: schedule.id,
+          course: courseId,
+        },
+        update: {
+          startTime: schedule.startTime,
+          endTime: schedule.endTime,
+        },
+      },
+    };
+  });
+  await CourseScheduleModel.bulkWrite(updateArr);
   //create 在 body 沒有帶 id 的 schedule
-  console.log(scheduleArr);
-  editScheduleZod.parse(scheduleArr);
+  const newScheduleArr = scheduleArr
+    .filter((schedule: CourseSchedule) => !schedule.id)
+    .map((schedule: CourseSchedule) => {
+      return {
+        ...schedule,
+        course: courseId,
+        coach: userId,
+      };
+    });
+  await CourseScheduleModel.create(newScheduleArr);
+
+  const schedules = await CourseScheduleModel.find({
+    course: courseId,
+    startTime: { $gte: new Date(scheduleArr[0].startTime) },
+    endTime: { $lte: new Date(scheduleArr.slice(-1)[0].endTime) },
+  });
+  handleSuccess(res, 200, 'get data', schedules);
 });
 //建立編輯授課價格
 export const editPrice = handleErrorAsync(async (req, res, next) => {
@@ -106,10 +150,10 @@ export const editPrice = handleErrorAsync(async (req, res, next) => {
 export const coachGetCourse = handleErrorAsync(async (req, res, next) => {
   const courseId = req.params.courseId;
   const userId = req.user?.id;
-  const course = await CourseModel.find({
-    course:courseId,
-    coach:userId
-     })
+  const course = await CourseModel.findOne({
+    _id: courseId,
+    coach: userId,
+  })
     .select('-coach')
     .populate({
       path: 'coursePrice',
@@ -127,4 +171,3 @@ export const coachGetCourse = handleErrorAsync(async (req, res, next) => {
     return appErrorService(400, 'no data', next);
   }
 });
-//教練課程授課時間
