@@ -13,6 +13,7 @@ import apiLimiter from './service/rateLimit';
 import usersRouter from './routes/user.route';
 import uploadRouter from './routes/upload';
 import coachRouter from './routes/coach.route';
+import notificationRouter from './routes/notification.route';
 import adminRouter from './routes/admin.route';
 import courseRouter from './routes/course.route';
 //env
@@ -47,6 +48,7 @@ app.use('/api', apiLimiter);
 app.use('/', usersRouter);
 app.use('/', uploadRouter);
 app.use('/', coachRouter);
+app.use('/', notificationRouter);
 app.use('/', adminRouter);
 app.use('/', courseRouter);
 app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));

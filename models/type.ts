@@ -1,4 +1,4 @@
-import type { Document , ObjectId } from 'mongoose';
+import type { Document, ObjectId } from 'mongoose';
 export interface IUser extends Document {
   createdAt: Date;
   updatedAt: Date;
@@ -44,20 +44,28 @@ export interface IUser extends Document {
   approvalStatus: 'pending' | 'success' | 'fail';
   reason: string;
 }
+
+export interface INotifications extends Document {
+  receiver: ObjectId;
+  title: string;
+  type: 'bookingSuccess' | 'classNotification';
+  status: 'seen' | 'active';
+  createdAt: Date;
+}
 export interface ICourse extends Document {
   createdAt: Date;
   updatedAt: Date;
-  coach:ObjectId;
+  coach: ObjectId;
   name: string;
   coverImage: string;
   description: string;
   category: string[];
   subCategory: string[];
   startDate: Date;
-  isActive:boolean;
+  isActive: boolean;
   approvalStatus: 'pending' | 'success' | 'fail';
-  reason:string;
-  rating:Number;
+  reason: string;
+  rating: Number;
 }
 export interface ICoursePrice extends Document {
   createdAt: Date;
@@ -84,7 +92,7 @@ export interface IBookingCourse extends Document {
   courseSchedule: ObjectId;
   meetingUrl: string;
   order: ObjectId;
-  isCanceled:boolean;
+  isCanceled: boolean;
   userCancelReason: string;
   coachCancelReason: string;
 }
@@ -93,7 +101,7 @@ export interface ICourseComment extends Document {
   updatedAt: Date;
   user: ObjectId;
   course: ObjectId;
-  bookingCourse:ObjectId;
-  content:string;
-  rating:Number
+  bookingCourse: ObjectId;
+  content: string;
+  rating: Number;
 }
