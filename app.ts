@@ -14,6 +14,7 @@ import usersRouter from './routes/user.route';
 import uploadRouter from './routes/upload';
 import coachRouter from './routes/coach.route';
 import adminRouter from './routes/admin.route';
+import courseRouter from './routes/course.route';
 //env
 import dotenv from 'dotenv';
 const app = express();
@@ -47,6 +48,7 @@ app.use('/', usersRouter);
 app.use('/', uploadRouter);
 app.use('/', coachRouter);
 app.use('/', adminRouter);
+app.use('/', courseRouter);
 app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 //404
 app.use(function (req: Request, res: Response, next: NextFunction) {

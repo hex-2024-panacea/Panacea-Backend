@@ -42,9 +42,16 @@ const extractDays = (expiresIn: string) => {
   return match ? parseInt(match[1], 10) : 7;
 };
 //isAuth
-export const isAuth = async (req: UserRequest, res: Response, next: NextFunction) => {
+export const isAuth = async (
+  req: UserRequest,
+  res: Response,
+  next: NextFunction,
+) => {
   let token;
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
     token = req.headers.authorization.split(' ')[1];
   }
 
@@ -61,7 +68,8 @@ export const isAuth = async (req: UserRequest, res: Response, next: NextFunction
       isRevoked: false,
     });
     if (currentUser && oauthToken) {
-      req.user = { id: currentUser.id, isCoach: currentUser.isCoach, isAdmin: currentUser.isAdmin };
+      const { id, isCoach, approvalStatus, isAdmin } = currentUser;
+      req.user = { id, isCoach, approvalStatus, isAdmin };
       return next();
     } else {
       return appErrorService(401, 'unauthenticated', next);
@@ -79,6 +87,20 @@ export const revokeToken = async (userId: string) => {
     },
     {
       isRevoked: true,
-    }
+    },
   );
+};
+//isCoach
+export const isCoach = (
+  req: UserRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (req.user) {
+    const { isCoach, approvalStatus } = req.user;
+    if (isCoach && approvalStatus == 'success') {
+      return next();
+    }
+  }
+  return appErrorService(403, 'you are not a coach', next);
 };
