@@ -47,12 +47,15 @@ const CourseSchema = new mongoose.Schema<ICourse>(
     },
     approvalStatus: {
       type: String,
-      enum: ['pending', 'success', 'failed'],
+      enum: ['pending', 'success', 'fail'],
       default: 'pending',
     },
     reason: {
       type: String,
-      dafault: '',
+      default: null,
+      required: function () {
+        return this.approvalStatus === 'fail';
+      },
     },
     rating: {
       type: Number,

@@ -55,7 +55,7 @@ export interface ICourse extends Document {
   subCategory: string[];
   startDate: Date;
   isActive:boolean;
-  approvalStatus: 'pending' | 'success' | 'failed';
+  approvalStatus: 'pending' | 'success' | 'fail';
   reason:string;
   rating:Number;
 }
