@@ -4,7 +4,7 @@ import { UserModel } from '../models/users';
 import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { registerMailSend, forgetPasswordSend } from '../service/mail';
-import { generateJwtSend, revokeToken} from '../service/auth';
+import { generateJwtSend, revokeAllToken, revokeToken} from '../service/auth';
 import {
   registerZod,
   signinZod,
@@ -42,7 +42,7 @@ export const register = handleErrorAsync(async (req, res, next) => {
 
 //登入
 export const signIn = handleErrorAsync(async (req, res, next) => {
-  let { email, password } = req.body;
+  const { email, password } = req.body;
   signinZod.parse({ email, password });
 
   const user = await UserModel.findOne({ email });
@@ -127,7 +127,7 @@ export const resetPassword = handleErrorAsync(async (req, res, next) => {
     }
   );
   if (user) {
-    await revokeToken(user.id);
+    await revokeAllToken(user.id);
     handleSuccess(res, 200, 'password reset');
   } else {
     return appErrorService(400, '發生錯誤', next);
@@ -143,18 +143,16 @@ export const updatePassword = handleErrorAsync(async (req, res, next) => {
     const currentUser = await UserModel.findById(_id);
     const isMatch = await bcrypt.compare(password, currentUser!.password as string);
     if (isMatch) {
-      const updatedAt = new Date();
+      const updatedAt = Date.now();
       const updatePassword = await bcrypt.hash(newPassword, 12);
       await UserModel.findByIdAndUpdate(
-        {
-          _id,
-        },
+        _id,
         {
           password: updatePassword,
           updatedAt,
         }
       );
-      await revokeToken(_id!);
+      await revokeAllToken(_id!);
       handleSuccess(res, 200, 'password update.');
     } else {
       return appErrorService(400, '發生錯誤', next);
@@ -166,7 +164,7 @@ export const updatePassword = handleErrorAsync(async (req, res, next) => {
 // 更新使用者資訊
 export const userUpdate = handleErrorAsync(async (req, res, next) => {
   const { name, avatar } = req.body;
-  const updatedAt = new Date();
+  const updatedAt = Date.now();
   const updateFields = { name, avatar, updatedAt };
   const _id = req.user?.id;
   const isCoach = req.user?.isCoach;
@@ -196,7 +194,7 @@ export const userInfo = handleErrorAsync(async (req, res, next) => {
 
 //註冊教練
 export const applyCoach = handleErrorAsync(async (req, res, next) => {
-  let { subject, specialty, language, workExperience, education, certifiedDocuments } = req.body;
+  const { subject, specialty, language, workExperience, education, certifiedDocuments } = req.body;
   const _id = req.user?.id;
   const isCoach = req.user?.isCoach;
   if (isCoach) {
@@ -204,7 +202,7 @@ export const applyCoach = handleErrorAsync(async (req, res, next) => {
   }
   try {
     registerCoachZod.parse(req.body);
-    const updatedAt = new Date();
+    const updatedAt = Date.now();
 
     await UserModel.findByIdAndUpdate(
       _id,
@@ -218,6 +216,7 @@ export const applyCoach = handleErrorAsync(async (req, res, next) => {
           education,
           certifiedDocuments,
           updatedAt,
+          approvalStatus: 'pending',
         },
       },
       { runValidators: true, new: true }
@@ -225,5 +224,16 @@ export const applyCoach = handleErrorAsync(async (req, res, next) => {
     handleSuccess(res, 200, 'submit success');
   } catch (error) {
     return appErrorService(400, (error as Error).message, next);
+  }
+});
+
+//登出
+export const logout = handleErrorAsync(async (req, res, next) => {
+  const result = await revokeToken(req);
+  
+  if(result){
+    handleSuccess(res, 200, 'logout success');
+  }else{
+    return appErrorService(400, 'logout failed', next);
   }
 });

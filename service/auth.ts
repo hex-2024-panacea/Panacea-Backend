@@ -61,7 +61,8 @@ export const isAuth = async (req: UserRequest, res: Response, next: NextFunction
       isRevoked: false,
     });
     if (currentUser && oauthToken) {
-      req.user = { id: currentUser.id, isCoach: currentUser.isCoach };
+      const { id, isCoach, approvalStatus, isAdmin } = currentUser;
+      req.user = { id, isCoach, approvalStatus, isAdmin };
       return next();
     } else {
       return appErrorService(401, 'unauthenticated', next);
@@ -70,8 +71,18 @@ export const isAuth = async (req: UserRequest, res: Response, next: NextFunction
     return appErrorService(400, (err as Error).message, next);
   }
 };
-//revoked access token
-export const revokeToken = async (userId: string) => {
+
+//isCoach
+export const isCoach = (req: UserRequest, res: Response, next: NextFunction) => {
+  if (req.user) {
+    const { isCoach, approvalStatus } = req.user;
+    if (isCoach && approvalStatus == 'success') {
+      return next();
+    }
+  }
+  return appErrorService(403, 'you are not a coach', next);
+};
+export const revokeAllToken = async (userId: string) => {
   await OauthAccessTokenModel.updateMany(
     {
       user: userId,
@@ -81,4 +92,22 @@ export const revokeToken = async (userId: string) => {
       isRevoked: true,
     }
   );
+};
+//revoke oauthAccessToken
+export const revokeToken = async (req: UserRequest) => {
+  const token = req.headers.authorization!.split(' ')[1];
+  const decoded = jwt.verify(token!, process.env.JWT_SECRET!) as JwtPayload;
+
+  const accessToken = await OauthAccessTokenModel.updateOne(
+    {
+      _id: decoded.oauthTokenId,
+      user: decoded.id,
+      isRevoked: false,
+    },
+    {
+      isRevoked: true,
+    }
+  );
+
+  return accessToken;
 };

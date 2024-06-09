@@ -41,7 +41,8 @@ export interface IUser extends Document {
   bankAccount: string;
   earnings: Number;
   actualAmount: Number;
-  approvalStatus: 'pending' | 'success' | 'failed';
+  approvalStatus: 'pending' | 'success' | 'fail';
+  reason: string;
 }
 
 export interface INotifications extends Document {
@@ -50,4 +51,57 @@ export interface INotifications extends Document {
   type: 'bookingSuccess' | 'classNotification';
   status: 'seen' | 'active';
   createdAt: Date;
+}
+export interface ICourse extends Document {
+  createdAt: Date;
+  updatedAt: Date;
+  coach: ObjectId;
+  name: string;
+  coverImage: string;
+  description: string;
+  category: string[];
+  subCategory: string[];
+  startDate: Date;
+  isActive: boolean;
+  approvalStatus: 'pending' | 'success' | 'fail';
+  reason: string;
+  rating: Number;
+}
+export interface ICoursePrice extends Document {
+  createdAt: Date;
+  updatedAt: Date;
+  course: ObjectId;
+  count: Number;
+  price: Number;
+}
+export interface ICourseSchedule extends Document {
+  createdAt: Date;
+  updatedAt: Date;
+  course: ObjectId;
+  coach: ObjectId;
+  startTime: Date;
+  endTime: Date;
+  isBooked: boolean;
+}
+export interface IBookingCourse extends Document {
+  createdAt: Date;
+  updatedAt: Date;
+  user: ObjectId;
+  course: ObjectId;
+  coach: ObjectId;
+  courseSchedule: ObjectId;
+  meetingUrl: string;
+  order: ObjectId;
+  isCanceled: boolean;
+  userCancelReason: string;
+  coachCancelReason: string;
+}
+export interface ICourseComment extends Document {
+  createdAt: Date;
+  updatedAt: Date;
+  user: ObjectId;
+  course: ObjectId;
+  bookingCourse: ObjectId;
+  content: string;
+  rating: Number;
 }

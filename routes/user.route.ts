@@ -10,6 +10,7 @@ import {
   userInfo,
   userUpdate,
   updatePassword,
+  logout
 } from '../controllers/user.controller';
 import { signedMiddleware } from '../service/signature';
 import throttle from '../service/throttle';
@@ -27,5 +28,6 @@ router.post('/api/auth/update-password', isAuth, updatePassword); // 更新密�
 router.get('/api/auth/user-info', isAuth, userInfo); // 取得使用者資訊
 router.patch('/api/auth/update-user', isAuth, userUpdate); // 更新使用者資訊
 router.post('/api/auth/apply-coach', isAuth, applyCoach); // 註冊教練
+router.post('/api/auth/logout', isAuth, logout); // 登出
 
 export default router;
