@@ -184,10 +184,17 @@ const UserSchema = new mongoose.Schema<IUser>({
   //審核狀態
   approvalStatus: {
     type: String,
-    enum: ['pending', 'success', 'failed'],
+    enum: ['pending', 'success', 'fail'],
     default: 'pending',
     required: function () {
       return this.isCoach;
+    },
+  }, //審核狀態原因
+  reason: {
+    type: String,
+    default: null,
+    required: function () {
+      return this.approvalStatus === 'fail';
     },
   },
 });

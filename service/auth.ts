@@ -61,7 +61,7 @@ export const isAuth = async (req: UserRequest, res: Response, next: NextFunction
       isRevoked: false,
     });
     if (currentUser && oauthToken) {
-      req.user = { id: currentUser.id, isCoach: currentUser.isCoach };
+      req.user = { id: currentUser.id, isCoach: currentUser.isCoach, isAdmin: currentUser.isAdmin };
       return next();
     } else {
       return appErrorService(401, 'unauthenticated', next);
@@ -71,11 +71,14 @@ export const isAuth = async (req: UserRequest, res: Response, next: NextFunction
   }
 };
 //revoked access token
-export const revokeToken = async(userId: string)=>{
-  await OauthAccessTokenModel.updateMany({
-    user:userId,
-    isRevoked:false
-  },{
-    isRevoked:true
-  });
-}
+export const revokeToken = async (userId: string) => {
+  await OauthAccessTokenModel.updateMany(
+    {
+      user: userId,
+      isRevoked: false,
+    },
+    {
+      isRevoked: true,
+    }
+  );
+};
