@@ -269,20 +269,42 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   // 使用 HASH 再次 SHA 加密字串，確保比對一致（確保不正確的請求觸發交易成功）
   if (!thisShaEncrypt === response.TradeSha) {
     console.log('付款失敗：TradeSha 不一致');
-    return appErrorService(400, 'no data', next);
+    return appErrorService(400, '付款失敗：TradeSha 不一致', next);
   }
 
   // 解密交易內容
   const data = createMpgAesDecrypt(response.TradeInfo);
   console.log('data:', data);
-
+  const orderModelData = await OrderModel.findOne({ merchantId: data.Result.MerchantOrderNo });
   // 取得交易內容，並查詢本地端資料庫是否有相符的訂單
-  // if (!orders[data?.Result?.MerchantOrderNo]) {
-  //   console.log('找不到訂單');
-  //   return res.end();
-  // }
-
+  if (!orderModelData?.merchantId === data?.Result?.MerchantOrderNo) {
+    console.log('找不到訂單');
+    return appErrorService(400, '找不到訂單', next);
+  }
   // // 交易完成，將成功資訊儲存於資料庫
-  // console.log('付款完成，訂單：', orders[data?.Result?.MerchantOrderNo]);
+  const returnOrderModel = await OrderModel.findOneAndUpdate(
+    { merchantId: data.Result.MerchantOrderNo },
+    {
+      $set: {
+        status: data.Status.toLowerCase(),
+        updatedAt: Date.now(),
+        ip: data.Result.IP,
+        tradeNo: data.Result.TradeNo,
+        escrowBank: data.Result.EscrowBank,
+        paymentType: data.Result.PaymentType,
+        payerAccount5Code: data.Result.PayerAccount5Code,
+        payBankCode: data.Result.PayBankCode,
+        payTime: data.Result.PayTime,
+        message: data.Message,
+      },
+    },
+    {
+      new: true,
+      upsert: true,
+      runValidators: true,
+    }
+  );
+
+  console.log('付款完成，訂單：', returnOrderModel);
   return handleSuccess(res, 200, 'get data');
 });
