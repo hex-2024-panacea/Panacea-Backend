@@ -1,9 +1,11 @@
-import express from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import mongoose from 'mongoose';
-import { Request, Response, NextFunction } from 'express';
+import dotenv from 'dotenv';
+import fs from 'fs';
+import YAML from 'yaml';
 import AppError from './types/AppError';
 import appErrorService from './service/appErrorService';
 import { resErrorProd, resErrorDev } from './service/resError';
@@ -16,11 +18,7 @@ import coachRouter from './routes/coach.route';
 import notificationRouter from './routes/notification.route';
 import adminRouter from './routes/admin.route';
 import courseRouter from './routes/course.route';
-//env
-import dotenv from 'dotenv';
-const app = express();
-const fs = require('fs');
-const YAML = require('yaml');
+
 const file = fs.readFileSync('./spec/@typespec/openapi3/openapi.yaml', 'utf8');
 const swaggerDocument = YAML.parse(file);
 dotenv.config({ path: './.env' });
@@ -36,6 +34,7 @@ mongoose
     console.log(err, '資料庫連線異常');
   });
 
+const app = express();
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

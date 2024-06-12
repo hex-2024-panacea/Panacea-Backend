@@ -1,13 +1,110 @@
 <html>
+  <head>
+    <title>Express</title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+  </head>
 
-<head>
-  <title>Express</title>
-  <link rel="stylesheet" href="/stylesheets/style.css">
-</head>
-
-<body>
-  <h1>Express</h1>
-  <p>Welcome to Express</p>
-</body>
-
+  <body>
+    <h1>Express</h1>
+    <p>Welcome to Express</p>
+    <form id="app" action="http://ccore.newebpay.com/MPG/mpg_gateway" method="post">
+      <label for="MerchantID">MerchantID</label>
+      <input type="text" name="MerchantID" value="MS152710332" readonly />
+      <label for="TradeInfo">TradeInfo</label>
+      <input
+        type="text"
+        name="TradeInfo"
+        value="584a22d7a31159db6d30bb205f3699bc474f47dc21c4167ea35df005b7becc0d5b9cc9f83dc1890971f10248624c57292524d3e49ca8b54367eb9345b255fccaf465658c2f701ed88a143924a3e00eb74bb156afde96b49c40c964441f6105a1205101652145406641f70a11a0be6ea7abcec32a85225dac3f56618bc3df76163deca1f8d6aaff5650dbc344dfeb0c44ea98b54529ae809444c8162f6200bcd554b9a82ee6874afddf3acd27f2cb64f07a05b4e00037a80061cb2762ed3396eac47ada7fcc332fa70976e410e5cbeb6f"
+        readonly
+      />
+      <label for="TradeSha">TradeSha</label>
+      <input
+        type="text"
+        name="TradeSha"
+        value="02298B921A03F2F42877B395A1117263F980E650ABBF351D525DD44C34C435DF"
+        readonly
+      />
+      <!-- <label for="TimeStamp">TimeStamp</label>
+      <input type="text" name="TimeStamp" value="1718109321" /> -->
+      <label for="Version">Version</label>
+      <input type="text" name="Version" value="2.0" readonly />
+      <!-- <label for="MerchantOrderNo">MerchantOrderNo</label>
+      <input type="text" name="MerchantOrderNo" value="1718109321" /> -->
+      <!-- <label for="Amt">Amt</label>
+      <input type="text" name="Amt" value="1000" /> -->
+      <!-- <label for="Email">Email</label>
+      <input type="email" name="Email" value="pp840405@gmail.com" /> -->
+      <button type="submit">送出</button>
+    </form>
+    <button id="btn">渲染</button>
+  </body>
+  <script>
+    function renderFormData(data) {
+      const form = document.querySelector('form');
+      // form.querySelector('input[name="MerchantID"]').value = data.MerchantID;
+      form.querySelector('input[name="TradeSha"]').value = data.TradeSha;
+      form.querySelector('input[name="TradeInfo"]').value = data.TradeInfo;
+      // form.querySelector('input[name="TimeStamp"]').value = data.TimeStamp;
+      // form.querySelector('input[name="MerchantOrderNo"]').value = data.MerchantOrderNo;
+      // form.querySelector('input[name="Amt"]').value = data.Amt;
+      // form.querySelector('input[name="Email"]').value = data.Email;
+    }
+    // document.querySelector('form').addEventListener('submit', function (e) {
+    //   e.preventDefault();
+    //   fetch('/api/gold-flow/order', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({ name: 'test' }),
+    //   })
+    //     .then((res) => res.json())
+    //     .then((data) => {
+    //       console.log(data.data);
+    //       const postData = {
+    //         MerchantID: data.data.MerchantID,
+    //         TradeSha: data.data.TradeSha,
+    //         TradeInfo: data.data.TradeInfo,
+    //         TimeStamp: data.data.timeStamp,
+    //         Version: data.data[data.data.timeStamp].Version,
+    //         MerchantOrderNo: data.data[data.data.timeStamp].MerchantOrderNo,
+    //         Amt: data.data[data.data.timeStamp].Amt,
+    //         Email: data.data[data.data.timeStamp].Email,
+    //       };
+    //       // console.log(postData);
+    //       // MPG(postData);
+    //       renderFormData(postData);
+    //     });
+    // });
+    const buttonElement = document.getElementById('btn');
+    buttonElement.addEventListener('click', function (e) {
+      fetch('/api/coach/purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization:
+            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGNlNzg5NWJiYjIzNTE5Nzc1YmZjNSIsIm9hdXRoVG9rZW5JZCI6IjY2NjllYzZjNjI1ZmI1MjZkZDJkZDA0MyIsImlhdCI6MTcxODIxNzgzNiwiZXhwIjoxNzE4ODIyNjM2fQ.xk2TndQsK3AljEsYh0V-2f9EEgcODxQhAAGgeGMaaAk',
+        },
+        body: JSON.stringify({ courseId: '664ce7895bbb23519775bfc5', name: '這是一門課程', price: 1000, amount: 10 }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log('html', data.data);
+          const postData = {
+            MerchantID: data.data.merchantID,
+            TradeSha: data.data.tradeSha,
+            TradeInfo: data.data.tradeInfo,
+            TimeStamp: data.data.timeStamp,
+            Version: data.data[data.data.timeStamp].version,
+            MerchantOrderNo: data.data[data.data.timeStamp].MerchantOrderNo,
+            Amt: data.data[data.data.timeStamp].Amt,
+            Email: data.data[data.data.timeStamp].Email,
+          };
+          renderFormData(postData);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+  </script>
 </html>
