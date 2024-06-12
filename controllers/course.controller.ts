@@ -10,7 +10,7 @@ import { CoursePriceModel } from '../models/coursePrice.model';
 import { CourseScheduleModel } from '../models/courseSchedule.model';
 import { OrderModel } from '../models/order.model';
 import { UserModel } from '../models/users';
-import { createMpgAesEncrypt, createMpgShaEncrypt, type genDataChainType } from '../util/crypto';
+import { createMpgAesEncrypt, createMpgShaEncrypt, createMpgAesDecrypt, type genDataChainType } from '../util/crypto';
 
 //建立課程
 export const createCourse = handleErrorAsync(async (req, res, next) => {
@@ -262,9 +262,9 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
 });
 
 export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
-  console.log('req.body notify data', req.body);
+  console.log('req.body', req.body);
   const response = req.body;
-
+  console.log('response.TradeInfo', response.TradeInfo);
   const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
   // 使用 HASH 再次 SHA 加密字串，確保比對一致（確保不正確的請求觸發交易成功）
   if (!thisShaEncrypt === response.TradeSha) {
@@ -273,7 +273,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   }
 
   // 解密交易內容
-  const data = createMpgAesEncrypt(response.TradeInfo);
+  const data = createMpgAesDecrypt(response.TradeInfo);
   console.log('data:', data);
 
   // 取得交易內容，並查詢本地端資料庫是否有相符的訂單
