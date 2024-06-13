@@ -246,19 +246,19 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   console.log('findSearch:', findSearch);
   console.log('data:', data);
   try {
-    // const orderModelData = await OrderModel.findOne(findSearch)
-    //   .then((data) => {
-    //     console.log('orderModelData Data:', data);
-    //     return data;
-    //   })
-    //   .catch((error) => {
-    //     throw error;
-    //   });
-    // console.log('orderModelData:', orderModelData);
-    // if (!orderModelData || orderModelData.orderId !== data.Result.MerchantOrderNo) {
-    //   console.log('找不到訂單');
-    //   return appErrorService(400, '找不到訂單', next);
-    // }
+    const orderModelData = await OrderModel.findOne(findSearch)
+      .then((data) => {
+        console.log('orderModelData Data:', data);
+        return data;
+      })
+      .catch((error) => {
+        throw error;
+      });
+    console.log('orderModelData:', orderModelData);
+    if (!orderModelData || orderModelData.orderId !== data.Result.MerchantOrderNo) {
+      console.log('找不到訂單');
+      // return appErrorService(400, '找不到訂單', next);
+    }
     const updateData = {
       status: data.Status.toLowerCase(),
       updatedAt: Date.now(),
@@ -271,7 +271,8 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
       payTime: data.Result.PayTime,
       message: data.Message,
     };
-    await OrderModel.findOneAndUpdate(
+    console.log('updateData:', updateData);
+    const OrderModelUpdate = await OrderModel.findOneAndUpdate(
       findSearch,
       { $set: updateData },
       {
@@ -280,6 +281,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
         runValidators: true,
       }
     );
+    console.log('OrderModelUpdate', OrderModelUpdate);
     return handleSuccess(res, 200, 'get data');
   } catch (error) {
     console.log('error', error);
