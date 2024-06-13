@@ -231,6 +231,7 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
 });
 
 export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
+  console.log('req', req);
   const response = Object.assign({}, req.body);
   console.log('response.TradeInfo', response);
   const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
@@ -243,6 +244,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   // 解密交易內容
   const data = createMpgAesDecrypt(response.TradeInfo);
   const findSearch = { merchantId: data.Result.MerchantID, orderId: data.Result.MerchantOrderNo };
+  console.log('findSearch:', findSearch);
   console.log('data:', data);
   try {
     const orderModelData = await OrderModel.findOne(findSearch);
