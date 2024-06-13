@@ -235,42 +235,42 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   console.log('response.TradeInfo', response);
   const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
   // 使用 HASH 再次 SHA 加密字串，確保比對一致（確保不正確的請求觸發交易成功）
-  if (!thisShaEncrypt === response.TradeSha) {
-    console.log('付款失敗：TradeSha 不一致');
+  if (thisShaEncrypt !== response.TradeSha) {
     return appErrorService(400, '付款失敗：TradeSha 不一致', next);
   }
 
   // 解密交易內容
   const data = createMpgAesDecrypt(response.TradeInfo);
+  const findSearch = { merchantId: data.Result.MerchantID, orderId: data.Result.MerchantOrderNo };
   console.log('data:', data);
-  const orderModelData = await OrderModel.findOne({ merchantId: data.Result.MerchantID });
-  // 取得交易內容，並查詢本地端資料庫是否有相符的訂單
-  if (!orderModelData?.merchantId === data?.Result?.MerchantOrderNo) {
-    console.log('找不到訂單');
-    return appErrorService(400, '找不到訂單', next);
-  }
-  // // 交易完成，將成功資訊儲存於資料庫
-  await OrderModel.findOneAndUpdate(
-    { merchantId: data.Result.MerchantID, orderId: data.Result.MerchantOrderNo },
-    {
-      $set: {
-        status: data.Status.toLowerCase(),
-        updatedAt: Date.now(),
-        ip: data.Result.IP,
-        tradeNo: data.Result.TradeNo,
-        escrowBank: data.Result.EscrowBank,
-        paymentType: data.Result.PaymentType,
-        payerAccount5Code: data.Result.PayerAccount5Code,
-        payBankCode: data.Result.PayBankCode,
-        payTime: data.Result.PayTime,
-        message: data.Message,
-      },
-    },
-    {
-      new: true,
-      upsert: true,
-      runValidators: true,
+  try {
+    const orderModelData = await OrderModel.findOne(findSearch);
+    if (!orderModelData || orderModelData.merchantId !== data.Result.MerchantOrderNo) {
+      return appErrorService(400, '找不到訂單', next);
     }
-  );
-  return handleSuccess(res, 200, 'get data');
+    const updateData = {
+      status: data.Status.toLowerCase(),
+      updatedAt: Date.now(),
+      ip: data.Result.IP,
+      tradeNo: data.Result.TradeNo,
+      escrowBank: data.Result.EscrowBank,
+      paymentType: data.Result.PaymentType,
+      payerAccount5Code: data.Result.PayerAccount5Code,
+      payBankCode: data.Result.PayBankCode,
+      payTime: data.Result.PayTime,
+      message: data.Message,
+    };
+    await OrderModel.findOneAndUpdate(
+      findSearch,
+      { $set: updateData },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true,
+      }
+    );
+    return handleSuccess(res, 200, 'get data');
+  } catch (error) {
+    return appErrorService(400, (error as Error).message, next);
+  }
 });
