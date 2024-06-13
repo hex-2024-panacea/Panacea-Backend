@@ -232,7 +232,7 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
 
 export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   const response = req.body;
-  console.log('response.TradeInfo', response.TradeInfo);
+  console.log('response.TradeInfo', response);
   const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
   // 使用 HASH 再次 SHA 加密字串，確保比對一致（確保不正確的請求觸發交易成功）
   if (!thisShaEncrypt === response.TradeSha) {
@@ -250,8 +250,8 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
     return appErrorService(400, '找不到訂單', next);
   }
   // // 交易完成，將成功資訊儲存於資料庫
-  const returnOrderModel = await OrderModel.findOneAndUpdate(
-    { merchantId: data.Result.MerchantID },
+  await OrderModel.findOneAndUpdate(
+    { merchantId: data.Result.MerchantID, orderId: data.Result.MerchantOrderNo },
     {
       $set: {
         status: data.Status.toLowerCase(),
@@ -272,7 +272,5 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
       runValidators: true,
     }
   );
-
-  console.log('付款完成，訂單：', returnOrderModel);
   return handleSuccess(res, 200, 'get data');
 });
