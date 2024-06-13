@@ -246,7 +246,8 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   console.log('data:', data);
   try {
     const orderModelData = await OrderModel.findOne(findSearch);
-    if (!orderModelData || orderModelData.merchantId !== data.Result.MerchantOrderNo) {
+    console.log('orderModelData:', orderModelData);
+    if (!orderModelData || orderModelData.orderId !== data.Result.MerchantOrderNo) {
       console.log('找不到訂單');
       return appErrorService(400, '找不到訂單', next);
     }
