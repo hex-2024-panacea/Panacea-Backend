@@ -232,7 +232,6 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
 
 export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   const response = Object.assign({}, req.body);
-  console.log('req.body', req.body);
   console.log('response.TradeInfo', response);
   const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
   // 使用 HASH 再次 SHA 加密字串，確保比對一致（確保不正確的請求觸發交易成功）
@@ -247,7 +246,14 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   console.log('findSearch:', findSearch);
   console.log('data:', data);
   try {
-    const orderModelData = await OrderModel.findOne(findSearch);
+    const orderModelData = await OrderModel.findOne(findSearch)
+      .then((data) => {
+        console.log('orderModelData Data:', data);
+        return data;
+      })
+      .catch((error) => {
+        throw error;
+      });
     console.log('orderModelData:', orderModelData);
     if (!orderModelData || orderModelData.orderId !== data.Result.MerchantOrderNo) {
       console.log('找不到訂單');
