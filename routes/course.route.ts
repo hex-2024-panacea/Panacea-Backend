@@ -2,6 +2,7 @@ import express from 'express';
 import { isAuth, isCoach } from '../service/auth';
 import {
   coachGetCourse,
+  coachGetCourses,
   createCourse,
   editPrice,
   editSchedule,
@@ -18,5 +19,6 @@ router.post(
   editSchedule,
 ); //建立編輯課程授課時間
 router.get('/api/coach/course/:courseId', isAuth, isCoach, coachGetCourse); //教練課程詳情頁
+router.get('/api/coach/course/list', isAuth, isCoach, coachGetCourses);
 
 export default router;
