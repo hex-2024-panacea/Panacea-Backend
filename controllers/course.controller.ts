@@ -236,6 +236,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
   // 使用 HASH 再次 SHA 加密字串，確保比對一致（確保不正確的請求觸發交易成功）
   if (thisShaEncrypt !== response.TradeSha) {
+    console.log('付款失敗：TradeSha 不一致');
     return appErrorService(400, '付款失敗：TradeSha 不一致', next);
   }
 
@@ -246,6 +247,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   try {
     const orderModelData = await OrderModel.findOne(findSearch);
     if (!orderModelData || orderModelData.merchantId !== data.Result.MerchantOrderNo) {
+      console.log('找不到訂單');
       return appErrorService(400, '找不到訂單', next);
     }
     const updateData = {
@@ -271,6 +273,8 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
     );
     return handleSuccess(res, 200, 'get data');
   } catch (error) {
+    console.log('error', error);
+    console.log('(error as Error).message', (error as Error).message);
     return appErrorService(400, (error as Error).message, next);
   }
 });
