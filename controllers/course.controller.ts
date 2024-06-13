@@ -228,43 +228,9 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
     version: VERSION,
     ...orderInfo,
   });
-  // const course = await CourseModel.findOne({ _id: courseId });
-  // if (!course) {
-  //   return appErrorService(400, 'no data', next);
-  // }
-  // //check coursePrice
-  // const coursePrice = await CoursePriceModel.findOne({
-  //   course,
-  // });
-  // if (!coursePrice) {
-  //   return appErrorService(400, 'no data', next);
-  // }
-  // //check courseSchedule
-  // const courseSchedule = await CourseScheduleModel.findOne({
-  //   course,
-  // });
-  // if (!courseSchedule) {
-  //   return appErrorService(400, 'no data', next);
-  // }
-  // //check bookingCourse
-  // const bookingCourse = await BookingCourseModel.findOne({
-  //   course,
-  // });
-  // if (bookingCourse) {
-  //   return appErrorService(400, 'no data', next);
-  // }
-  // //create bookingCourse
-  // const bookingCourse = await BookingCourseModel.create({
-  //   course,
-  //   user: userId,
-  //   coursePrice: coursePrice,
-  //   courseSchedule: courseSchedule,
-  // });
-  // return handleSuccess(res, 200, 'get data', bookingCourse);
 });
 
 export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
-  console.log('req.body', req.body);
   const response = req.body;
   console.log('response.TradeInfo', response.TradeInfo);
   const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
@@ -277,7 +243,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   // 解密交易內容
   const data = createMpgAesDecrypt(response.TradeInfo);
   console.log('data:', data);
-  const orderModelData = await OrderModel.findOne({ merchantId: data.Result.MerchantOrderNo });
+  const orderModelData = await OrderModel.findOne({ merchantId: data.Result.MerchantID });
   // 取得交易內容，並查詢本地端資料庫是否有相符的訂單
   if (!orderModelData?.merchantId === data?.Result?.MerchantOrderNo) {
     console.log('找不到訂單');
@@ -285,7 +251,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   }
   // // 交易完成，將成功資訊儲存於資料庫
   const returnOrderModel = await OrderModel.findOneAndUpdate(
-    { merchantId: data.Result.MerchantOrderNo },
+    { merchantId: data.Result.MerchantID },
     {
       $set: {
         status: data.Status.toLowerCase(),
