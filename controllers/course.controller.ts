@@ -231,7 +231,7 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
 });
 
 export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
-  const response = req.body;
+  const response = Object.assign({}, req.body);
   console.log('response.TradeInfo', response);
   const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
   // 使用 HASH 再次 SHA 加密字串，確保比對一致（確保不正確的請求觸發交易成功）
