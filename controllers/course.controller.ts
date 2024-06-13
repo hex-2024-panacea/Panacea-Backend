@@ -187,6 +187,12 @@ export const deleteCourse = handleErrorAsync(async (req, res, next) => {
   }
 });
 //教練課程列表
+const filterSetting = {
+  searchFields: ['name'],
+  filterFields: ['category', 'subCategory'],
+  orderFields: ['createdAt', 'updatedAt'],
+  timeFields: ['createdAt', 'updatedAt'],
+};
 export const coachGetCourses = handleErrorAsync(async (req, res, next) => {
   const userId = req.user?.id;
   const { currentPage, orderWay, orderBy, category, subCategory } = req.query;
