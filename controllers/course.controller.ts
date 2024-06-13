@@ -205,6 +205,8 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
     userId,
     courseId,
     orderId: orderInfo[timeStamp].MerchantOrderNo,
+    merchantId: MERCHANT_ID,
+    totalAmount: orderInfo[timeStamp].Amt,
     amount,
     price,
     name,

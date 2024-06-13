@@ -30,17 +30,17 @@ const schema = new mongoose.Schema<IOrder>({
   },
   // 購買價格
   price: {
-    type: Number,
+    type: String,
     required: true,
   },
   // 購買金額
   amount: {
-    type: Number,
+    type: String,
     required: true,
   },
   //總金額
   totalAmount: {
-    type: Number,
+    type: String,
     required: true,
   },
   //交易資訊
