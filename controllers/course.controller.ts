@@ -246,7 +246,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   console.log('findSearch:', findSearch);
   console.log('data:', data);
   try {
-    const orderModelData = await OrderModel.findOne(findSearch)
+    const orderModelData = await OrderModel.find(findSearch)
       .then((data) => {
         console.log('orderModelData Data:', data);
         return data;
@@ -255,10 +255,10 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
         throw error;
       });
     console.log('orderModelData:', orderModelData);
-    if (!orderModelData || orderModelData.orderId !== data.Result.MerchantOrderNo) {
-      console.log('找不到訂單');
-      // return appErrorService(400, '找不到訂單', next);
-    }
+    // if (!orderModelData || orderModelData?.orderId !== data.Result.MerchantOrderNo) {
+    //   console.log('找不到訂單');
+    //   // return appErrorService(400, '找不到訂單', next);
+    // }
     const updateData = {
       status: data.Status.toLowerCase(),
       updatedAt: Date.now(),
