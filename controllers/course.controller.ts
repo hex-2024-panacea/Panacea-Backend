@@ -242,7 +242,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
 
   // 解密交易內容
   const data = createMpgAesDecrypt(response.TradeInfo);
-  const findSearch = { merchantId: data.Result.MerchantID, orderId: data.Result.MerchantOrderNo };
+  const findSearch = { merchantId: new RegExp(data.Result.MerchantID, 'i'), orderId: data.Result.MerchantOrderNo };
   console.log(typeof data.Result.MerchantID, typeof data.Result.MerchantOrderNo);
   console.log('data:', data);
   try {
