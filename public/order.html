@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <title>測試藍新金流頁面</title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+  </head>
+
+  <body>
+    <h1>測試藍新金流頁面</h1>
+    <form id="app" action="https://ccore.newebpay.com/MPG/mpg_gateway" method="post">
+      <label for="MerchantID">MerchantID</label>
+      <input type="text" name="MerchantID" value="MS152710332" readonly />
+      <label for="TradeInfo">TradeInfo</label>
+      <input type="text" name="TradeInfo" value="" readonly />
+      <label for="TradeSha">TradeSha</label>
+      <input type="text" name="TradeSha" value="" readonly />
+      <label for="Version">Version</label>
+      <input type="text" name="Version" value="2.0" readonly />
+      <button type="submit">送出</button>
+    </form>
+    <button id="btn">渲染</button>
+  </body>
+  <script>
+    function renderFormData(data) {
+      const form = document.querySelector('form');
+      form.querySelector('input[name="TradeSha"]').value = data.TradeSha;
+      form.querySelector('input[name="TradeInfo"]').value = data.TradeInfo;
+    }
+
+    const buttonElement = document.getElementById('btn');
+    buttonElement.addEventListener('click', function (e) {
+      fetch('/api/coach/course/purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization:
+            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGNlNzg5NWJiYjIzNTE5Nzc1YmZjNSIsIm9hdXRoVG9rZW5JZCI6IjY2NmM3NzhlNDlmM2E3YTI5NWI2NjlmOSIsImlhdCI6MTcxODM4NDUyNiwiZXhwIjoxNzE4OTg5MzI2fQ.AewV4QrRTYK0mFhiFF8z3SnPbhZd5amEnlIvbpD1yMc',
+        },
+        body: JSON.stringify({
+          courseId: '664ce7895bbb23519775bfc9',
+          name: `這是一門課程${Math.random(100) * 10}`,
+          price: 1000,
+          amount: 10,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log('html', data.data);
+          const postData = {
+            MerchantID: data.data.merchantId,
+            TradeSha: data.data.tradeSha,
+            TradeInfo: data.data.tradeInfo,
+            TimeStamp: data.data.timeStamp,
+            Version: data.data[data.data.timeStamp].version,
+            MerchantOrderNo: data.data[data.data.timeStamp].MerchantOrderNo,
+            Amt: data.data[data.data.timeStamp].Amt,
+            Email: data.data[data.data.timeStamp].Email,
+          };
+          renderFormData(postData);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+  </script>
+</html>

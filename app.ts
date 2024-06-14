@@ -50,6 +50,7 @@ app.use('/', coachRouter);
 app.use('/', notificationRouter);
 app.use('/', adminRouter);
 app.use('/', courseRouter);
+app.use('/order', express.static(path.join(__dirname, 'public/order.html')));
 app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 //404
 app.use(function (req: Request, res: Response, next: NextFunction) {
