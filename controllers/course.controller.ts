@@ -243,10 +243,11 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   // 解密交易內容
   const data = createMpgAesDecrypt(response.TradeInfo);
   const findSearch = { merchantId: data.Result.MerchantID, orderId: data.Result.MerchantOrderNo };
-  console.log('findSearch:', findSearch);
+  console.log(typeof data.Result.MerchantID, typeof data.Result.MerchantOrderNo);
   console.log('data:', data);
   try {
-    const orderModelData = await OrderModel.find(findSearch)
+    console.log('findSearch:', findSearch);
+    const orderModelData = await OrderModel.findOne(findSearch)
       .then((data) => {
         console.log('orderModelData Data:', data);
         return data;
@@ -255,10 +256,10 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
         throw error;
       });
     console.log('orderModelData:', orderModelData);
-    // if (!orderModelData || orderModelData?.orderId !== data.Result.MerchantOrderNo) {
-    //   console.log('找不到訂單');
-    //   // return appErrorService(400, '找不到訂單', next);
-    // }
+    if (!orderModelData || orderModelData.orderId !== data.Result.MerchantOrderNo) {
+      console.log('找不到訂單');
+      // return appErrorService(400, '找不到訂單', next);
+    }
     const updateData = {
       status: data.Status.toLowerCase(),
       updatedAt: Date.now(),
