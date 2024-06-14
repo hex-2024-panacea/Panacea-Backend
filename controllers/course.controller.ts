@@ -183,9 +183,7 @@ export const deleteCourse = handleErrorAsync(async (req, res, next) => {
 
 //購買課程
 export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
-  console.log('dddd');
   const userId = req.user?.id;
-
   const { courseId, name, price, amount } = req.body;
   const { MERCHANT_ID, VERSION } = process.env;
   const userModelData = await UserModel.findById(userId);
@@ -213,13 +211,6 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
     tradeInfo: TradeInfo,
     tradeSha: TradeSha,
   });
-  console.log({
-    merchantId: MERCHANT_ID,
-    tradeSha: TradeSha,
-    tradeInfo: TradeInfo,
-    version: VERSION,
-    ...orderInfo,
-  });
   return handleSuccess(res, 200, 'GET', {
     merchantId: MERCHANT_ID,
     tradeSha: TradeSha,
@@ -232,8 +223,8 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
 
 export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   const response = Object.assign({}, req.body);
-  console.log('response.TradeInfo', response);
   const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
+
   // 使用 HASH 再次 SHA 加密字串，確保比對一致（確保不正確的請求觸發交易成功）
   if (thisShaEncrypt !== response.TradeSha) {
     console.log('付款失敗：TradeSha 不一致');
@@ -242,23 +233,12 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
 
   // 解密交易內容
   const data = createMpgAesDecrypt(response.TradeInfo);
-  const findSearch = { merchantId: new RegExp(data.Result.MerchantID, 'i'), orderId: data.Result.MerchantOrderNo };
-  console.log(typeof data.Result.MerchantID, typeof data.Result.MerchantOrderNo);
-  console.log('data:', data);
+  const findSearch = { merchantId: data.Result.MerchantID, orderId: data.Result.MerchantOrderNo };
   try {
-    console.log('findSearch:', findSearch);
-    const orderModelData = await OrderModel.findOne(findSearch)
-      .then((data) => {
-        console.log('orderModelData Data:', data);
-        return data;
-      })
-      .catch((error) => {
-        throw error;
-      });
-    console.log('orderModelData:', orderModelData);
+    const orderModelData = await OrderModel.findOne(findSearch);
     if (!orderModelData || orderModelData.orderId !== data.Result.MerchantOrderNo) {
       console.log('找不到訂單');
-      // return appErrorService(400, '找不到訂單', next);
+      return appErrorService(400, '找不到訂單', next);
     }
     const updateData = {
       status: data.Status.toLowerCase(),
@@ -272,8 +252,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
       payTime: data.Result.PayTime,
       message: data.Message,
     };
-    console.log('updateData:', updateData);
-    const OrderModelUpdate = await OrderModel.findOneAndUpdate(
+    await OrderModel.findOneAndUpdate(
       findSearch,
       { $set: updateData },
       {
@@ -282,11 +261,8 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
         runValidators: true,
       }
     );
-    console.log('OrderModelUpdate', OrderModelUpdate);
     return handleSuccess(res, 200, 'get data');
   } catch (error) {
-    console.log('error', error);
-    console.log('(error as Error).message', (error as Error).message);
     return appErrorService(400, (error as Error).message, next);
   }
 });
