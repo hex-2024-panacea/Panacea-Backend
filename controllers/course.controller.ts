@@ -214,14 +214,14 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
     tradeSha: TradeSha,
   });
   console.log({
-    merchantID: MERCHANT_ID,
+    merchantId: MERCHANT_ID,
     tradeSha: TradeSha,
     tradeInfo: TradeInfo,
     version: VERSION,
     ...orderInfo,
   });
   return handleSuccess(res, 200, 'GET', {
-    merchantID: MERCHANT_ID,
+    merchantId: MERCHANT_ID,
     tradeSha: TradeSha,
     tradeInfo: TradeInfo,
     timeStamp,

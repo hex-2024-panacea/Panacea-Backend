@@ -7,7 +7,7 @@
   <body>
     <h1>Express</h1>
     <p>Welcome to Express</p>
-    <form id="app" action="http://ccore.newebpay.com/MPG/mpg_gateway" method="post">
+    <form id="app" action="https://ccore.newebpay.com/MPG/mpg_gateway" method="post">
       <label for="MerchantID">MerchantID</label>
       <input type="text" name="MerchantID" value="MS152710332" readonly />
       <label for="TradeInfo">TradeInfo</label>
@@ -78,12 +78,12 @@
     // });
     const buttonElement = document.getElementById('btn');
     buttonElement.addEventListener('click', function (e) {
-      fetch('https://test-panacea.zeabur.app/api/coach/purchase', {
+      fetch('https://test-panacea.zeabur.app/api/coach/course/purchase', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization:
-            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGNlNzg5NWJiYjIzNTE5Nzc1YmZjNSIsIm9hdXRoVG9rZW5JZCI6IjY2NjllYzZjNjI1ZmI1MjZkZDJkZDA0MyIsImlhdCI6MTcxODIxNzgzNiwiZXhwIjoxNzE4ODIyNjM2fQ.xk2TndQsK3AljEsYh0V-2f9EEgcODxQhAAGgeGMaaAk',
+            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGNlNzg5NWJiYjIzNTE5Nzc1YmZjNSIsIm9hdXRoVG9rZW5JZCI6IjY2NmM3NzhlNDlmM2E3YTI5NWI2NjlmOSIsImlhdCI6MTcxODM4NDUyNiwiZXhwIjoxNzE4OTg5MzI2fQ.AewV4QrRTYK0mFhiFF8z3SnPbhZd5amEnlIvbpD1yMc',
         },
         body: JSON.stringify({
           courseId: '664ce7895bbb23519775bfc9',
@@ -94,9 +94,9 @@
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log('html', data.data);
+          console.log('html', data);
           const postData = {
-            MerchantID: data.data.merchantID,
+            MerchantID: data.data.merchantId,
             TradeSha: data.data.tradeSha,
             TradeInfo: data.data.tradeInfo,
             TimeStamp: data.data.timeStamp,
