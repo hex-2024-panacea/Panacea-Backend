@@ -33,14 +33,14 @@ mongoose
   .catch((err: Error) => {
     console.log(err, '資料庫連線異常');
   });
-
+const cors = require('cors');
 const app = express();
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(cors());
 //api rate limit
 app.use('/api', apiLimiter);
 //route
