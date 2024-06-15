@@ -217,7 +217,6 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
     tradeInfo: TradeInfo,
     timeStamp,
     version: VERSION,
-    ...orderInfo,
   });
 });
 
