@@ -1,6 +1,5 @@
 import UserRequest from '../types/UserRequest';
 import IndexSetting from '../types/IndexSetting';
-import DocumentQuery from 'mongoose';
 
 export const pagination = async function (
   model: any,
