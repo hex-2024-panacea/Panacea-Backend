@@ -16,6 +16,7 @@ import coachRouter from './routes/coach.route';
 import notificationRouter from './routes/notification.route';
 import adminRouter from './routes/admin.route';
 import courseRouter from './routes/course.route';
+import bookingCourse from './routes/bookingCourse.route';
 //env
 import dotenv from 'dotenv';
 const app = express();
@@ -26,7 +27,10 @@ const swaggerDocument = YAML.parse(file);
 dotenv.config({ path: './.env' });
 
 //mongoose
-const DB = process.env.DATABASE!.replace('<password>', process.env.DATABASE_PASSWORD!);
+const DB = process.env.DATABASE!.replace(
+  '<password>',
+  process.env.DATABASE_PASSWORD!,
+);
 mongoose
   .connect(DB)
   .then(() => {
@@ -51,13 +55,19 @@ app.use('/', coachRouter);
 app.use('/', notificationRouter);
 app.use('/', adminRouter);
 app.use('/', courseRouter);
+app.use('/api/booking-course', bookingCourse);
 app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 //404
 app.use(function (req: Request, res: Response, next: NextFunction) {
   appErrorService(404, '找不到路徑', next);
 });
 //error
-app.use(function (err: AppError, req: Request, res: Response, next: NextFunction) {
+app.use(function (
+  err: AppError,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   err.statusCode = err.statusCode || 500;
   if (process.env.NODE_ENV === 'dev') {
     return resErrorDev(err, res);
