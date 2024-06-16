@@ -7,6 +7,13 @@ import CoursePrice from '../types/CoursePrice';
 import CourseSchedule from '../types/CourseSchedule';
 import { CoursePriceModel } from '../models/coursePrice.model';
 import { CourseScheduleModel } from '../models/courseSchedule.model';
+import {
+  getFilters,
+  indexHandler,
+  pagination,
+  getPage,
+  getSort,
+} from '../service/modelService';
 
 //建立課程
 export const createCourse = handleErrorAsync(async (req, res, next) => {
@@ -176,6 +183,7 @@ export const deleteCourse = handleErrorAsync(async (req, res, next) => {
   const { courseId } = req.params;
   const userId = req.user?.id;
   //判斷是否有今天以後的預約課程 bookingSchedule，有的話不可刪除課程
+  //如果有學員購買了但尚未上完，也不可刪除
   const course = await CourseModel.findOneAndDelete({
     course: courseId,
     coach: userId,
@@ -187,14 +195,26 @@ export const deleteCourse = handleErrorAsync(async (req, res, next) => {
   }
 });
 //教練課程列表
-const filterSetting = {
+const indexSetting = {
+  perPage: 15,
+  getAuth: true,
   searchFields: ['name'],
   filterFields: ['category', 'subCategory'],
-  orderFields: ['createdAt', 'updatedAt'],
+  sortFields: ['createdAt', 'updatedAt'],
   timeFields: ['createdAt', 'updatedAt'],
 };
 export const coachGetCourses = handleErrorAsync(async (req, res, next) => {
-  const userId = req.user?.id;
-  const { currentPage, orderWay, orderBy, category, subCategory } = req.query;
-  //totalPage,currentPage,limit,skip
+  const { page, perPage } = getPage(req, indexSetting);
+  const filters = getFilters(req, indexSetting);
+  const sort = getSort(req, indexSetting);
+
+  const results = await CourseModel.find(filters)
+    .sort(sort)
+    .limit(perPage)
+    .skip(perPage * page)
+    .select('-coach');
+
+  const meta = await pagination(CourseModel, filters, page, indexSetting);
+
+  return handleSuccess(res, 200, 'get data', results, meta);
 });
