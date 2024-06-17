@@ -2,12 +2,13 @@ import { Decimal } from 'decimal.js';
 import handleErrorAsync from '../service/handleErrorAsync';
 import appErrorService from '../service/appErrorService';
 import { CourseModel } from '../models/course.model';
-import { createZod, editPriceZod, editScheduleZod } from '../zods/course.zod';
+import { createZod, editPriceZod, editScheduleZod, getScheduleZod } from '../zods/course.zod';
 import handleSuccess from '../service/handleSuccess';
 import CoursePrice from '../types/CoursePrice';
 import CourseSchedule from '../types/CourseSchedule';
 import { CoursePriceModel } from '../models/coursePrice.model';
 import { CourseScheduleModel } from '../models/courseSchedule.model';
+import { getFilters, pagination, getPage, getSort } from '../service/modelService';
 import { OrderModel } from '../models/order.model';
 import { UserModel } from '../models/users';
 import { createMpgAesEncrypt, createMpgShaEncrypt, createMpgAesDecrypt, type genDataChainType } from '../util/crypto';
@@ -170,6 +171,7 @@ export const deleteCourse = handleErrorAsync(async (req, res, next) => {
   const { courseId } = req.params;
   const userId = req.user?.id;
   //判斷是否有今天以後的預約課程 bookingSchedule，有的話不可刪除課程
+  //如果有學員購買了但尚未上完，也不可刪除
   const course = await CourseModel.findOneAndDelete({
     course: courseId,
     coach: userId,
@@ -179,6 +181,62 @@ export const deleteCourse = handleErrorAsync(async (req, res, next) => {
   } else {
     return appErrorService(400, '發生錯誤', next);
   }
+});
+//教練課程列表
+const courseIndexSetting = {
+  perPage: 15,
+  getAuth: true,
+  searchFields: ['name'],
+  filterFields: ['category', 'subCategory'],
+  sortFields: ['createdAt', 'updatedAt'],
+  timeFields: ['createdAt', 'updatedAt'],
+};
+export const coachGetCourses = handleErrorAsync(async (req, res, next) => {
+  const { page, perPage } = getPage(req, courseIndexSetting);
+  const filters = getFilters(req, courseIndexSetting);
+  const sort = getSort(req, courseIndexSetting);
+
+  const results = await CourseModel.find(filters)
+    .sort(sort)
+    .limit(perPage)
+    .skip(perPage * page)
+    .select('-coach');
+
+  const meta = await pagination(CourseModel, filters, page, courseIndexSetting);
+
+  return handleSuccess(res, 200, 'get data', results, meta);
+});
+//教練-取得課程授課時間
+export const getSchedule = handleErrorAsync(async (req, res, next) => {
+  const courseId = req.params.courseId;
+
+  interface Query {
+    startTime?: string;
+    endTime?: string;
+  }
+  let { startTime, endTime } = req.query as Query;
+  getScheduleZod.parse({ startTime, endTime });
+  if (!startTime) {
+    startTime = new Date().toDateString();
+  }
+  if (!endTime) {
+    const futureDate = new Date(startTime);
+    futureDate.setDate(futureDate.getDate() + 6);
+    endTime = futureDate.toDateString();
+  }
+
+  const schedules = await CourseScheduleModel.find({
+    course: courseId,
+    startTime: { $gte: new Date(startTime as string) },
+    endTime: { $lte: new Date(endTime as string) },
+  }).select('-coach -course -isBooked');
+  const available = schedules.filter((schedule) => !schedule.isBooked);
+  const booked = schedules.filter((schedule) => schedule.isBooked);
+  const result = {
+    available,
+    booked,
+  };
+  return handleSuccess(res, 200, 'get data', result);
 });
 
 //購買課程
@@ -258,7 +316,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
         new: true,
         upsert: true,
         runValidators: true,
-      }
+      },
     );
     return handleSuccess(res, 200, 'get data');
   } catch (error) {

@@ -23,19 +23,19 @@ const CourseSchema = new mongoose.Schema<ICourse>(
     },
     coverImage: {
       type: String,
-      dafault: '',
+      default: '',
     },
     description: {
       type: String,
-      dafault: '',
+      default: '',
     },
     category: {
       type: [String],
-      dafault: [],
+      default: [],
     },
     subCategory: {
       type: [String],
-      dafault: [],
+      default: [],
     },
     startDate: {
       type: Date,
@@ -59,7 +59,7 @@ const CourseSchema = new mongoose.Schema<ICourse>(
     },
     rating: {
       type: Number,
-      dafault: 0,
+      default: 0,
     },
   },
   {
