@@ -1,36 +1,22 @@
+import { Decimal } from 'decimal.js';
 import handleErrorAsync from '../service/handleErrorAsync';
 import appErrorService from '../service/appErrorService';
 import { CourseModel } from '../models/course.model';
-import {
-  createZod,
-  editPriceZod,
-  editScheduleZod,
-  getScheduleZod,
-} from '../zods/course.zod';
+import { createZod, editPriceZod, editScheduleZod, getScheduleZod } from '../zods/course.zod';
 import handleSuccess from '../service/handleSuccess';
 import CoursePrice from '../types/CoursePrice';
 import CourseSchedule from '../types/CourseSchedule';
 import { CoursePriceModel } from '../models/coursePrice.model';
 import { CourseScheduleModel } from '../models/courseSchedule.model';
-import {
-  getFilters,
-  pagination,
-  getPage,
-  getSort,
-} from '../service/modelService';
+import { getFilters, pagination, getPage, getSort } from '../service/modelService';
+import { OrderModel } from '../models/order.model';
+import { UserModel } from '../models/users';
+import { createMpgAesEncrypt, createMpgShaEncrypt, createMpgAesDecrypt, type genDataChainType } from '../util/crypto';
 
 //建立課程
 export const createCourse = handleErrorAsync(async (req, res, next) => {
   const _id = req.user?.id;
-  const {
-    name,
-    coverImage,
-    description,
-    category,
-    subCategory,
-    startDate,
-    isActive,
-  } = req.body;
+  const { name, coverImage, description, category, subCategory, startDate, isActive } = req.body;
 
   createZod.parse({
     name,
@@ -66,9 +52,7 @@ export const editSchedule = handleErrorAsync(async (req, res, next) => {
     return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
   });
   //delete 時間區間內，沒有被預約，且id沒有出現在body的schedule
-  const existScheduleArr = scheduleArr.filter(
-    (schedule: CourseSchedule) => schedule.id,
-  );
+  const existScheduleArr = scheduleArr.filter((schedule: CourseSchedule) => schedule.id);
   const existIdArr = scheduleArr.map((schedule: CourseSchedule) => schedule.id);
   await CourseScheduleModel.deleteMany({
     _id: { $nin: existIdArr },
@@ -253,4 +237,89 @@ export const getSchedule = handleErrorAsync(async (req, res, next) => {
     booked,
   };
   return handleSuccess(res, 200, 'get data', result);
+});
+
+//購買課程
+export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
+  const userId = req.user?.id;
+  const { courseId, name, price, amount } = req.body;
+  const { MERCHANT_ID, VERSION } = process.env;
+  const userModelData = await UserModel.findById(userId);
+  const timeStamp: number = Math.round(new Date().getTime() / 1000);
+  const orderInfo: { [key: number]: genDataChainType } = {
+    [timeStamp]: {
+      Amt: new Decimal(price).times(new Decimal(amount)).toString(),
+      ItemDesc: name,
+      TimeStamp: timeStamp.toString(),
+      MerchantOrderNo: timeStamp.toString(),
+      Email: userModelData?.email,
+    },
+  };
+  const TradeInfo: string = createMpgAesEncrypt(orderInfo[timeStamp]);
+  const TradeSha: string = createMpgShaEncrypt(TradeInfo);
+  await OrderModel.create({
+    userId,
+    courseId,
+    orderId: orderInfo[timeStamp].MerchantOrderNo,
+    merchantId: MERCHANT_ID,
+    totalPrice: orderInfo[timeStamp].Amt,
+    purchaseCount: amount,
+    price,
+    name,
+    tradeInfo: TradeInfo,
+    tradeSha: TradeSha,
+  });
+  return handleSuccess(res, 200, 'GET', {
+    merchantId: MERCHANT_ID,
+    tradeSha: TradeSha,
+    tradeInfo: TradeInfo,
+    timeStamp,
+    version: VERSION,
+  });
+});
+
+export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
+  const response = Object.assign({}, req.body);
+  const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
+
+  // 使用 HASH 再次 SHA 加密字串，確保比對一致（確保不正確的請求觸發交易成功）
+  if (thisShaEncrypt !== response.TradeSha) {
+    console.log('付款失敗：TradeSha 不一致');
+    return appErrorService(400, '付款失敗：TradeSha 不一致', next);
+  }
+
+  // 解密交易內容
+  const data = createMpgAesDecrypt(response.TradeInfo);
+  const findSearch = { merchantId: data.Result.MerchantID, orderId: data.Result.MerchantOrderNo };
+  try {
+    const orderModelData = await OrderModel.findOne(findSearch);
+    if (!orderModelData || orderModelData.orderId !== data.Result.MerchantOrderNo) {
+      console.log('找不到訂單');
+      return appErrorService(400, '找不到訂單', next);
+    }
+    const updateData = {
+      status: data.Status.toLowerCase(),
+      updatedAt: Date.now(),
+      ip: data.Result.IP,
+      tradeNo: data.Result.TradeNo,
+      escrowBank: data.Result.EscrowBank,
+      paymentType: data.Result.PaymentType,
+      payerAccount5Code: data.Result.PayerAccount5Code,
+      payBankCode: data.Result.PayBankCode,
+      payTime: data.Result.PayTime,
+      message: data.Message,
+    };
+    await OrderModel.findOneAndUpdate(
+      findSearch,
+      { $set: updateData },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true,
+      },
+    );
+    return handleSuccess(res, 200, 'get data');
+  } catch (error) {
+    return appErrorService(400, (error as Error).message, next);
+  }
 });

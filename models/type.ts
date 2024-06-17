@@ -105,3 +105,29 @@ export interface ICourseComment extends Document {
   content: string;
   rating: Number;
 }
+
+export interface IOrder extends Document {
+  userId: ObjectId;
+  courseId: ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+  merchantId: string;
+  orderId: string;
+  name: string;
+  price: string;
+  purchaseCount: string;
+  totalPrice: string;
+  remainingCount: string;
+  bookingCount: string;
+  tradeInfo: string;
+  tradeSha: string;
+  status: 'pending' | 'success' | 'fail';
+  ip: string;
+  tradeNo: string;
+  escrowBank: string;
+  paymentType: string;
+  payerAccount5Code: string;
+  payBankCode: string;
+  payTime: string;
+  message: string;
+}
