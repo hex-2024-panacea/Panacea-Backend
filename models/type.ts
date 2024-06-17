@@ -115,7 +115,7 @@ export interface IOrder extends Document {
   orderId: string;
   name: string;
   price: string;
-  amount: string;
+  purchaseCount: string;
   totalPrice: string;
   remainingCount: string;
   bookingCount: string;

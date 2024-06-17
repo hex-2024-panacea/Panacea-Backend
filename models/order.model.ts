@@ -34,8 +34,8 @@ const schema = new mongoose.Schema<IOrder>(
       type: String,
       required: true,
     },
-    // 購買數量
-    amount: {
+    // 購買數量(堂數)
+    purchaseCount: {
       type: String,
       required: true,
     },
