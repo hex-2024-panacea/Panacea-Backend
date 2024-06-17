@@ -6,7 +6,7 @@ import { coachCancelZod, userCancelZod } from '../zods/bookingCourse.zod';
 
 //教練取消授課
 export const coachCancel = handleErrorAsync(async (req, res, next) => {
-  const bookingId = req.params.bookingCourseId;
+  const bookingId = req.params.id;
   const userId = req.user?.id;
 
   const { coachCancelRemark } = req.body;
@@ -28,7 +28,7 @@ export const coachCancel = handleErrorAsync(async (req, res, next) => {
 });
 //學員取消預約課程
 export const userCancel = handleErrorAsync(async (req, res, next) => {
-  const bookingId = req.params.bookingCourseId;
+  const bookingId = req.params.id;
   const userId = req.user?.id;
 
   const { userCancelRemark } = req.body;
