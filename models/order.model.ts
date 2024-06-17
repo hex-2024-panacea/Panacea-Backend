@@ -34,13 +34,23 @@ const schema = new mongoose.Schema<IOrder>(
       type: String,
       required: true,
     },
-    // 購買金額
+    // 購買數量
     amount: {
       type: String,
       required: true,
     },
-    //總金額
-    totalAmount: {
+    // 總金額
+    totalPrice: {
+      type: String,
+      required: true,
+    },
+    // 剩餘堂數
+    remainingCount: {
+      type: String,
+      required: true,
+    },
+    // 預約堂數
+    bookingCount: {
       type: String,
       required: true,
     },

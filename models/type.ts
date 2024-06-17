@@ -114,9 +114,11 @@ export interface IOrder extends Document {
   merchantId: string;
   orderId: string;
   name: string;
-  price: Number;
-  amount: Number;
-  totalAmount: Number;
+  price: string;
+  amount: string;
+  totalPrice: string;
+  remainingCount: string;
+  bookingCount: string;
   tradeInfo: string;
   tradeSha: string;
   status: 'pending' | 'success' | 'fail';
