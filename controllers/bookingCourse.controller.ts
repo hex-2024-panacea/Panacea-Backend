@@ -20,6 +20,7 @@ export const coachCancel = handleErrorAsync(async (req, res, next) => {
   });
 
   if (booking) {
+    //update order booking count
     return handleSuccess(res, 200, 'cancel success');
   } else {
     return appErrorService(400, 'cancel failed', next);
@@ -41,6 +42,7 @@ export const userCancel = handleErrorAsync(async (req, res, next) => {
   });
 
   if (booking) {
+    //update order booking count
     return handleSuccess(res, 200, 'cancel success');
   } else {
     return appErrorService(400, 'cancel failed', next);
