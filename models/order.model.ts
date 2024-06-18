@@ -47,11 +47,13 @@ const schema = new mongoose.Schema<IOrder>(
     // 剩餘堂數
     remainingCount: {
       type: String,
+      default: '0',
       required: true,
     },
     // 預約堂數
     bookingCount: {
       type: String,
+      default: '0',
       required: true,
     },
     //交易資訊
