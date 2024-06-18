@@ -10,8 +10,8 @@ export const coachCancel = handleErrorAsync(async (req, res, next) => {
   const bookingId = req.params.id;
   const userId = req.user?.id;
 
-  const { coachCancelRemark } = req.body;
-  coachCancelZod.parse({ coachCancelRemark });
+  const { coachCancelReason } = req.body;
+  coachCancelZod.parse({ coachCancelReason });
 
   const booking = await BookingCourseModel.findOneAndUpdate(
     {
@@ -20,7 +20,7 @@ export const coachCancel = handleErrorAsync(async (req, res, next) => {
       isCanceled: false,
     },
     {
-      coachCancelRemark,
+      coachCancelReason,
       isCanceled: true,
     },
   );
@@ -41,8 +41,8 @@ export const userCancel = handleErrorAsync(async (req, res, next) => {
   const bookingId = req.params.id;
   const userId = req.user?.id;
 
-  const { userCancelRemark } = req.body;
-  userCancelZod.parse({ userCancelRemark });
+  const { userCancelReason } = req.body;
+  userCancelZod.parse({ userCancelReason });
 
   const booking = await BookingCourseModel.findOneAndUpdate(
     {
@@ -51,7 +51,7 @@ export const userCancel = handleErrorAsync(async (req, res, next) => {
       isCanceled: false,
     },
     {
-      userCancelRemark,
+      userCancelReason,
       isCanceled: true,
     },
   );
