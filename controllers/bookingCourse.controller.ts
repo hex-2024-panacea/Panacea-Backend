@@ -96,3 +96,32 @@ export const coachGetShow = handleErrorAsync(async (req, res, next) => {
     return appErrorService(400, 'no data', next);
   }
 });
+//學員-已預約詳情
+export const userGetShow = handleErrorAsync(async (req, res, next) => {
+  const bookingId = req.params.id;
+  const userId = req.user?.id;
+
+  const booking = await BookingCourseModel.findOne({
+    _id: bookingId,
+    user: userId,
+  })
+    .select('-user -order')
+    .populate({
+      path: 'course',
+      select: '_id name content coverImage category subCategory',
+    })
+    .populate({
+      path: 'courseSchedule',
+      select: '_id startTime endTime',
+    })
+    .populate({
+      path: 'coach',
+      select: '_id name avatar',
+    });
+
+  if (booking) {
+    return handleSuccess(res, 200, 'get data', booking);
+  } else {
+    return appErrorService(400, 'no data', next);
+  }
+});
