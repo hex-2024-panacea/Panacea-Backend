@@ -67,3 +67,32 @@ export const userCancel = handleErrorAsync(async (req, res, next) => {
     return appErrorService(400, 'cancel failed', next);
   }
 });
+//教練-授課詳情
+export const coachGetShow = handleErrorAsync(async (req, res, next) => {
+  const bookingId = req.params.id;
+  const userId = req.user?.id;
+
+  const booking = await BookingCourseModel.findOne({
+    _id: bookingId,
+    coach: userId,
+  })
+    .select('-coach -order')
+    .populate({
+      path: 'course',
+      select: '_id name content coverImage category subCategory',
+    })
+    .populate({
+      path: 'courseSchedule',
+      select: '_id startTime endTime',
+    })
+    .populate({
+      path: 'user',
+      select: '_id name avatar',
+    });
+
+  if (booking) {
+    return handleSuccess(res, 200, 'get data', booking);
+  } else {
+    return appErrorService(400, 'no data', next);
+  }
+});

@@ -56,11 +56,32 @@ const BookingCourse = new mongoose.Schema<IBookingCourse>(
     },
   },
   {
+    id: false,
     versionKey: false,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 
-export const BookingCourseModel = mongoose.model(
-  'BookingCourse',
-  BookingCourse,
-);
+BookingCourse.virtual('coachDetail', {
+  ref: 'User',
+  localField: '_id',
+  foreignField: 'coach',
+});
+BookingCourse.virtual('userDetail', {
+  ref: 'User',
+  localField: '_id',
+  foreignField: 'user',
+});
+BookingCourse.virtual('courseDetail', {
+  ref: 'Course',
+  localField: '_id',
+  foreignField: 'course',
+});
+BookingCourse.virtual('courseScheduleDetail', {
+  ref: 'CourseSchedule',
+  localField: '_id',
+  foreignField: 'courseSchedule',
+});
+
+export const BookingCourseModel = mongoose.model('BookingCourse', BookingCourse);
