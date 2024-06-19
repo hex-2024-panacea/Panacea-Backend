@@ -1,8 +1,4 @@
-import express, {
-  type Request,
-  type Response,
-  type NextFunction,
-} from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
@@ -30,10 +26,7 @@ const swaggerDocument = YAML.parse(file);
 dotenv.config({ path: './.env' });
 
 //mongoose
-const DB = process.env.DATABASE!.replace(
-  '<password>',
-  process.env.DATABASE_PASSWORD!,
-);
+const DB = process.env.DATABASE!.replace('<password>', process.env.DATABASE_PASSWORD!);
 mongoose
   .connect(DB)
   .then(() => {
@@ -57,7 +50,7 @@ app.use('/', usersRouter);
 app.use('/', uploadRouter);
 app.use('/', coachRouter);
 app.use('/', notificationRouter);
-app.use('/', adminRouter);
+app.use('/api/admin', adminRouter);
 app.use('/', courseRouter);
 app.use('/api/coach/booking-course', bookingCourseCoach);
 app.use('/api/user/booking-course', bookingCourseUser);
@@ -68,12 +61,7 @@ app.use(function (req: Request, res: Response, next: NextFunction) {
   appErrorService(404, '找不到路徑', next);
 });
 //error
-app.use(function (
-  err: AppError,
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+app.use(function (err: AppError, req: Request, res: Response, next: NextFunction) {
   err.statusCode = err.statusCode || 500;
   if (process.env.NODE_ENV === 'dev') {
     return resErrorDev(err, res);
