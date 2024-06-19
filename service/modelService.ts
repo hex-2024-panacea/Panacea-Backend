@@ -1,12 +1,7 @@
 import UserRequest from '../types/UserRequest';
 import IndexSetting from '../types/IndexSetting';
 
-export const pagination = async function (
-  model: any,
-  query: any,
-  currentPage: number,
-  setting: IndexSetting,
-) {
+export const pagination = async function (model: any, query: any, currentPage: number, setting: IndexSetting) {
   const perPage = setting.perPage;
   const total = await model.countDocuments(query).exec();
   const totalPages = Math.ceil(total / perPage);
@@ -21,18 +16,12 @@ export const pagination = async function (
   return meta;
 };
 export const getPage = function (req: UserRequest, setting: IndexSetting) {
-  const currentPage = (req.query.currentPage as string)
-    ? Number(req.query.currentPage)
-    : 1;
+  const currentPage = (req.query.currentPage as string) ? Number(req.query.currentPage) : 1;
   const page = Math.max(0, currentPage - 1);
   const perPage = setting.perPage;
   return { page, perPage };
 };
-export const indexHandler = async function (
-  model: any,
-  req: UserRequest,
-  setting: IndexSetting,
-) {
+export const indexHandler = async function (model: any, req: UserRequest, setting: IndexSetting) {
   //UNDONE:目前還沒有想好select,populate 該怎麼拆出去寫
   const { page, perPage } = getPage(req, setting);
   const filters = getFilters(req, setting);
@@ -95,9 +84,9 @@ export const getFilters = function (req: UserRequest, setting: IndexSetting) {
     }
   });
   //getAuth
-  if (setting.getAuth) {
+  if (setting.getAuth && setting.getAuthField) {
     const userId = req.user?.id;
-    filters.user = userId;
+    filters[setting.getAuthField] = userId;
   }
   return filters;
 };

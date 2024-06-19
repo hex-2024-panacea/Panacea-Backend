@@ -186,6 +186,7 @@ export const deleteCourse = handleErrorAsync(async (req, res, next) => {
 const courseIndexSetting = {
   perPage: 15,
   getAuth: true,
+  getAuthField: 'user',
   searchFields: ['name'],
   filterFields: ['category', 'subCategory'],
   sortFields: ['createdAt', 'updatedAt'],
