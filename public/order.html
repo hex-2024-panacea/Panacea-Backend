@@ -33,7 +33,7 @@
         headers: {
           'Content-Type': 'application/json',
           Authorization:
-            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGNlNzg5NWJiYjIzNTE5Nzc1YmZjNSIsIm9hdXRoVG9rZW5JZCI6IjY2NmM3NzhlNDlmM2E3YTI5NWI2NjlmOSIsImlhdCI6MTcxODM4NDUyNiwiZXhwIjoxNzE4OTg5MzI2fQ.AewV4QrRTYK0mFhiFF8z3SnPbhZd5amEnlIvbpD1yMc',
+            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NGNlNzg5NWJiYjIzNTE5Nzc1YmZjNSIsIm9hdXRoVG9rZW5JZCI6IjY2NzE4MDE5YjQ0YWMyZDkzYTBiZDQwNCIsImlhdCI6MTcxODcxNDM5MywiZXhwIjoxNzE5MzE5MTkzfQ.pStfx_xFLxB0DM56itzvXdw689u7zmdJYUkEETBjz00',
         },
         body: JSON.stringify({
           courseId: '664ce7895bbb23519775bfc9',
@@ -50,10 +50,10 @@
             TradeSha: data.data.tradeSha,
             TradeInfo: data.data.tradeInfo,
             TimeStamp: data.data.timeStamp,
-            Version: data.data[data.data.timeStamp].version,
-            MerchantOrderNo: data.data[data.data.timeStamp].MerchantOrderNo,
-            Amt: data.data[data.data.timeStamp].Amt,
-            Email: data.data[data.data.timeStamp].Email,
+            // Version: data.data[data.data.timeStamp].version,
+            // MerchantOrderNo: data.data[data.data.timeStamp].MerchantOrderNo,
+            // Amt: data.data[data.data.timeStamp].Amt,
+            // Email: data.data[data.data.timeStamp].Email,
           };
           renderFormData(postData);
         })
