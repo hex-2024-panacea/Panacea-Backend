@@ -96,14 +96,10 @@ export const coachGetShow = handleErrorAsync(async (req, res, next) => {
     _id: bookingId,
     coach: userId,
   })
-    .select('-coach -order')
+    .select('-coach -order -courseSchedule')
     .populate({
       path: 'course',
       select: '_id name content coverImage category subCategory',
-    })
-    .populate({
-      path: 'courseSchedule',
-      select: '_id startTime endTime',
     })
     .populate({
       path: 'user',
@@ -125,14 +121,10 @@ export const userGetShow = handleErrorAsync(async (req, res, next) => {
     _id: bookingId,
     user: userId,
   })
-    .select('-user -order')
+    .select('-user -order -courseSchedule')
     .populate({
       path: 'course',
       select: '_id name content coverImage category subCategory',
-    })
-    .populate({
-      path: 'courseSchedule',
-      select: '_id startTime endTime',
     })
     .populate({
       path: 'coach',
@@ -145,6 +137,7 @@ export const userGetShow = handleErrorAsync(async (req, res, next) => {
     return appErrorService(400, 'no data', next);
   }
 });
+//教練-取得授課清單
 const coachIndexSetting = {
   perPage: 15,
   getAuth: true,
@@ -162,38 +155,35 @@ export const coachGetIndex = handleErrorAsync(async (req, res, next) => {
   const { status } = req.query;
   if (status === 'canceled') {
     filters.isCanceled = true;
+  } else if (status === 'completed') {
+    filters.endTime = {
+      $lte: today,
+    };
+  } else if (status === 'not-start') {
+    filters.startTime = {
+      $gte: today,
+    };
   }
 
-  let results = BookingCourseModel.find(filters)
+  let results = await BookingCourseModel.find(filters)
     .sort(sort)
     .limit(perPage)
     .skip(perPage * page)
-    .select('-coach');
+    .select('-coach -courseSchedule')
+    .populate({
+      path: 'course',
+      select: '_id name content coverImage category subCategory',
+    })
+    .populate({
+      path: 'user',
+      select: '_id name avatar',
+    });
 
-  if (status === 'completed') {
-    results = results.populate({
-      path: 'courseSchedule',
-      match: { endTime: { $lt: today } },
-      select: '_id startTime endTime',
-    });
-  } else if (status === 'not-start') {
-    results = results.populate({
-      path: 'courseSchedule',
-      match: { startTime: { $gt: today } },
-      select: '_id startTime endTime',
-    });
-  } else {
-    results = results.populate({
-      path: 'courseSchedule',
-      select: '_id startTime endTime',
-    });
-  }
-
-  const bookings = await results.exec();
   const meta = await pagination(BookingCourseModel, filters, page, coachIndexSetting);
 
-  return handleSuccess(res, 200, 'get data', bookings, meta);
+  return handleSuccess(res, 200, 'get data', results, meta);
 });
+//學員-已預約課程
 const userIndexSetting = {
   perPage: 15,
   getAuth: true,
@@ -203,5 +193,39 @@ const userIndexSetting = {
   timeFields: ['createdAt', 'updatedAt'],
 };
 export const userGetIndex = handleErrorAsync(async (req, res, next) => {
-  const userId = req.user?.id;
+  const today = new Date();
+  const { page, perPage } = getPage(req, userIndexSetting);
+  const filters = getFilters(req, userIndexSetting);
+  const sort = getSort(req, userIndexSetting);
+
+  const { status } = req.query;
+  if (status === 'canceled') {
+    filters.isCanceled = true;
+  } else if (status === 'completed') {
+    filters.endTime = {
+      $lte: today,
+    };
+  } else if (status === 'not-start') {
+    filters.startTime = {
+      $gte: today,
+    };
+  }
+
+  let results = await BookingCourseModel.find(filters)
+    .sort(sort)
+    .limit(perPage)
+    .skip(perPage * page)
+    .select('-coach -courseSchedule')
+    .populate({
+      path: 'course',
+      select: '_id name content coverImage category subCategory',
+    })
+    .populate({
+      path: 'user',
+      select: '_id name avatar',
+    });
+
+  const meta = await pagination(BookingCourseModel, filters, page, coachIndexSetting);
+
+  return handleSuccess(res, 200, 'get data', results, meta);
 });
