@@ -1,4 +1,4 @@
-import { date, z } from 'zod';
+import { z } from 'zod';
 import type { ObjectId } from 'bson';
 
 export const coachCancelZod = z.object({
