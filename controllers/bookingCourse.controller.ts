@@ -2,6 +2,7 @@ import handleErrorAsync from '../service/handleErrorAsync';
 import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { BookingCourseModel } from '../models/bookingCourse.model';
+import { CourseScheduleModel } from '../models/courseSchedule.model';
 import { coachCancelZod, userCancelZod } from '../zods/bookingCourse.zod';
 import { updateOrderCount } from '../service/orderService';
 import { getFilters, pagination, getPage, getSort } from '../service/modelService';
@@ -27,6 +28,15 @@ export const coachCancel = handleErrorAsync(async (req, res, next) => {
   );
 
   if (booking) {
+    await CourseScheduleModel.findOneAndUpdate(
+      {
+        _id: booking.courseSchedule,
+        isBooked: true,
+      },
+      {
+        isBooked: false,
+      },
+    );
     //update order booking count
     const orderResult = await updateOrderCount(booking.course, next);
     if (orderResult instanceof Error) {
@@ -58,6 +68,15 @@ export const userCancel = handleErrorAsync(async (req, res, next) => {
   );
 
   if (booking) {
+    await CourseScheduleModel.findOneAndUpdate(
+      {
+        _id: booking.courseSchedule,
+        isBooked: true,
+      },
+      {
+        isBooked: false,
+      },
+    );
     //update order booking count
     const orderResult = await updateOrderCount(booking.course, next);
     if (orderResult instanceof Error) {
