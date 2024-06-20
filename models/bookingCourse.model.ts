@@ -28,6 +28,14 @@ const BookingCourse = new mongoose.Schema<IBookingCourse>(
       ref: 'User',
       required: [true, 'user ID 必填'],
     },
+    startTime: {
+      type: Date,
+      required: [true, 'startTime 必填'],
+    },
+    endTime: {
+      type: Date,
+      required: [true, 'endTime 必填'],
+    },
     courseSchedule: {
       type: mongoose.Schema.ObjectId,
       ref: 'CourseSchedule',
