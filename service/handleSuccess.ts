@@ -3,8 +3,15 @@ type responseDataType = {
   code: number;
   message?: string;
   data?: object | [] | null;
+  meta?: object | null;
 };
-const handleSuccess = (res: Response, statusCode: number, message: string, data: object | [] | null = null) => {
+const handleSuccess = (
+  res: Response,
+  statusCode: number,
+  message: string,
+  data: object | [] | null = null,
+  meta: object | null = null,
+) => {
   const responseData: responseDataType = {
     code: statusCode,
   };
@@ -13,6 +20,9 @@ const handleSuccess = (res: Response, statusCode: number, message: string, data:
   }
   if (data) {
     responseData.data = data;
+  }
+  if (meta) {
+    responseData.meta = meta;
   }
   res.status(statusCode).json(responseData);
 };

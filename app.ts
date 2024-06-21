@@ -18,6 +18,8 @@ import coachRouter from './routes/coach.route';
 import notificationRouter from './routes/notification.route';
 import adminRouter from './routes/admin.route';
 import courseRouter from './routes/course.route';
+import bookingCourseCoach from './routes/bookingCourseCoach.route';
+import bookingCourseUser from './routes/bookingCourseUser.route';
 
 const file = fs.readFileSync('./spec/@typespec/openapi3/openapi.yaml', 'utf8');
 const swaggerDocument = YAML.parse(file);
@@ -48,8 +50,10 @@ app.use('/', usersRouter);
 app.use('/', uploadRouter);
 app.use('/', coachRouter);
 app.use('/', notificationRouter);
-app.use('/', adminRouter);
+app.use('/api/admin', adminRouter);
 app.use('/', courseRouter);
+app.use('/api/coach/booking-course', bookingCourseCoach);
+app.use('/api/user/booking-course', bookingCourseUser);
 app.use('/order', express.static(path.join(__dirname, 'public/order.html')));
 app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 //404
