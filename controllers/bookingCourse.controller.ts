@@ -229,3 +229,11 @@ export const userGetIndex = handleErrorAsync(async (req, res, next) => {
 
   return handleSuccess(res, 200, 'get data', results, meta);
 });
+//預約課程
+export const create = handleErrorAsync(async (req, res, next) => {
+  const userId = req.user?.id;
+  const { course, order, courseSchedule } = req.body;
+  //check course exist
+  //check order can book
+  //check courseSchedule can book
+});
