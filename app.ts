@@ -51,7 +51,7 @@ app.use('/', uploadRouter);
 app.use('/', coachRouter);
 app.use('/', notificationRouter);
 app.use('/api/admin', adminRouter);
-app.use('/api/coach', courseRouter);
+app.use('/api/coach/course', courseRouter);
 app.use('/api/coach/booking-course', bookingCourseCoach);
 app.use('/api/user/booking-course', bookingCourseUser);
 app.use('/order', express.static(path.join(__dirname, 'public/order.html')));

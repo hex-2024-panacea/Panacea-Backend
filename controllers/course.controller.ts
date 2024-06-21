@@ -12,7 +12,6 @@ import { getFilters, pagination, getPage, getSort } from '../service/modelServic
 import { OrderModel } from '../models/order.model';
 import { UserModel } from '../models/users';
 import { createMpgAesEncrypt, createMpgShaEncrypt, createMpgAesDecrypt, type genDataChainType } from '../util/crypto';
-import { database } from 'firebase-admin';
 
 //建立課程
 export const createCourse = handleErrorAsync(async (req, res, next) => {
@@ -329,6 +328,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
 //金流導向
 export const spgatewayReturn = handleErrorAsync(async (req, res, next) => {
   const response = Object.assign({}, req.body);
+  console.log('response', response);
   const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
 
   // 使用 HASH 再次 SHA 加密字串，確保比對一致（確保不正確的請求觸發交易成功）
@@ -340,37 +340,16 @@ export const spgatewayReturn = handleErrorAsync(async (req, res, next) => {
   // 解密交易內容
   const data = createMpgAesDecrypt(response.TradeInfo);
   console.log('test', data);
-  // const findSearch = { merchantId: data.Result.MerchantID, orderId: data.Result.MerchantOrderNo };
-  // try {
-  //   const orderModelData = await OrderModel.findOne(findSearch);
-  //   if (!orderModelData || orderModelData.orderId !== data.Result.MerchantOrderNo) {
-  //     console.log('找不到訂單');
-  //     return appErrorService(400, '找不到訂單', next);
-  //   }
-  //   const updateData = {
-  //     status: data.Status.toLowerCase(),
-  //     updatedAt: Date.now(),
-  //     ip: data.Result.IP,
-  //     tradeNo: data.Result.TradeNo,
-  //     escrowBank: data.Result.EscrowBank,
-  //     paymentType: data.Result.PaymentType,
-  //     payerAccount5Code: data.Result.PayerAccount5Code,
-  //     payBankCode: data.Result.PayBankCode,
-  //     payTime: data.Result.PayTime,
-  //     message: data.Message,
-  //   };
-  //   await OrderModel.findOneAndUpdate(
-  //     findSearch,
-  //     { $set: updateData },
-  //     {
-  //       new: true,
-  //       upsert: true,
-  //       runValidators: true,
-  //     }
-  //   );
-  //   return handleSuccess(res, 200, 'get data');
-  // } catch (error) {
-  //   return appErrorService(400, (error as Error).message, next);
-  // }
-  return handleSuccess(res, 200, 'get data');
+  const findSearch = { merchantId: data.Result.MerchantID, orderId: data.Result.MerchantOrderNo };
+  try {
+    const orderModelData = await OrderModel.findOne(findSearch);
+    if (!orderModelData || orderModelData.orderId !== data.Result.MerchantOrderNo) {
+      console.log('找不到訂單');
+      return appErrorService(400, '找不到訂單', next);
+    }
+
+    return handleSuccess(res, 200, 'get data');
+  } catch (error) {
+    return appErrorService(400, (error as Error).message, next);
+  }
 });
