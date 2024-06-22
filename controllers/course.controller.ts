@@ -328,7 +328,6 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
 //金流導向
 export const spgatewayReturn = handleErrorAsync(async (req, res, next) => {
   const response = Object.assign({}, req.body);
-  console.log('response', response);
   const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
 
   // 使用 HASH 再次 SHA 加密字串，確保比對一致（確保不正確的請求觸發交易成功）
@@ -339,7 +338,6 @@ export const spgatewayReturn = handleErrorAsync(async (req, res, next) => {
 
   // 解密交易內容
   const data = createMpgAesDecrypt(response.TradeInfo);
-  console.log('test', data);
   const findSearch = { merchantId: data.Result.MerchantID, orderId: data.Result.MerchantOrderNo };
   try {
     const orderModelData = await OrderModel.findOne(findSearch);
@@ -347,7 +345,21 @@ export const spgatewayReturn = handleErrorAsync(async (req, res, next) => {
       console.log('找不到訂單');
       return appErrorService(400, '找不到訂單', next);
     }
-
+    const { NEWEBPAY_RETURN_URL } = process.env;
+    const params = new URLSearchParams({
+      title: orderModelData.status === 'success' ? '交易成功' : '交易失敗',
+      message: orderModelData.message,
+      status: orderModelData.status,
+      orderId: orderModelData.orderId,
+      paymentType: orderModelData.paymentType,
+      payerAccount5Code: orderModelData.payerAccount5Code,
+      payBankCode: orderModelData.payBankCode,
+      payTime: orderModelData.payTime,
+      totalPrice: orderModelData.totalPrice,
+      tradeNo: orderModelData.tradeNo,
+    }).toString();
+    console.log('orderModelData', orderModelData);
+    res.redirect(`${NEWEBPAY_RETURN_URL}/order/success?${params}`);
     return handleSuccess(res, 200, 'get data');
   } catch (error) {
     return appErrorService(400, (error as Error).message, next);
