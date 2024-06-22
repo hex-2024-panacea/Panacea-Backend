@@ -3,6 +3,8 @@ import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { BookingCourseModel } from '../models/bookingCourse.model';
 import { CourseScheduleModel } from '../models/courseSchedule.model';
+import { CourseModel } from '../models/course.model';
+import { OrderModel } from '../models/order.model';
 import { coachCancelZod, userCancelZod } from '../zods/bookingCourse.zod';
 import { updateOrderCount } from '../service/orderService';
 import { getFilters, pagination, getPage, getSort } from '../service/modelService';
@@ -230,10 +232,42 @@ export const userGetIndex = handleErrorAsync(async (req, res, next) => {
   return handleSuccess(res, 200, 'get data', results, meta);
 });
 //預約課程
-export const create = handleErrorAsync(async (req, res, next) => {
+export const userCreate = handleErrorAsync(async (req, res, next) => {
   const userId = req.user?.id;
-  const { course, order, courseSchedule } = req.body;
-  //check course exist
+  const { course: courseId, order: orderId, courseSchedule: scheduleId } = req.body;
   //check order can book
-  //check courseSchedule can book
+  const existOrder = await OrderModel.findOne({
+    _id: courseId,
+    user: userId,
+  });
+  if (existOrder) {
+    const remainCount = parseInt(existOrder.remainingCount);
+    if (!isNaN(remainCount) && remainCount > 0) {
+      //check courseSchedule can book
+      const existCourseSchedule = await CourseScheduleModel.findOne({
+        _id: scheduleId,
+        course: courseId,
+        isBooked: false,
+      });
+      if (existCourseSchedule) {
+        const { startTime, endTime, coach } = existCourseSchedule;
+        //create meeting url QQ
+        const meetingUrl = 'meeting';
+        const booking = await BookingCourseModel.create({
+          user: userId,
+          course: courseId,
+          coach,
+          startTime,
+          endTime,
+          courseSchedule: scheduleId,
+          order: orderId,
+          meetingUrl,
+        });
+        if (booking) {
+          return handleSuccess(res, 200, 'book success');
+        }
+      }
+    }
+  }
+  return appErrorService(400, 'book failed', next);
 });
