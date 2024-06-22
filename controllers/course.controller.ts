@@ -11,6 +11,7 @@ import { CourseScheduleModel } from '../models/courseSchedule.model';
 import { getFilters, pagination, getPage, getSort } from '../service/modelService';
 import { OrderModel } from '../models/order.model';
 import { UserModel } from '../models/users';
+import { BookingCourseModel } from '../models/bookingCourse.model';
 import { createMpgAesEncrypt, createMpgShaEncrypt, createMpgAesDecrypt, type genDataChainType } from '../util/crypto';
 
 //建立課程
@@ -170,22 +171,45 @@ export const coachGetCourse = handleErrorAsync(async (req, res, next) => {
 export const deleteCourse = handleErrorAsync(async (req, res, next) => {
   const { courseId } = req.params;
   const userId = req.user?.id;
-  //判斷是否有今天以後的預約課程 bookingSchedule，有的話不可刪除課程
-  //如果有學員購買了但尚未上完，也不可刪除
-  const course = await CourseModel.findOneAndDelete({
+  const course = await CourseModel.findOne({
     course: courseId,
     coach: userId,
   });
   if (course) {
-    //delete coursePrice,courseSchedule,bookingCourse
+    //判斷是否有今天以後的預約課程 bookingCourse，有的話不可刪除課程
+    //如果有學員購買了但尚未上完，也不可刪除=>order remainingCount > 0
+    const bookings = await BookingCourseModel.countDocuments({
+      startTime: {
+        $gte: new Date(),
+        isCanceled: false,
+        course: courseId,
+      },
+    }).exec();
+    const orders = await OrderModel.countDocuments({
+      course: courseId,
+      remainingCount: { $ne: '0' },
+    }).exec();
+    if (bookings > 0 || orders > 0) {
+      return appErrorService(400, 'delete failed', next);
+    }
+    //delete course
+    await course.deleteOne();
+    //delete coursePrice,courseSchedule
+    await CoursePriceModel.deleteMany({
+      course: courseId,
+    });
+    await CourseScheduleModel.deleteMany({
+      course: courseId,
+    });
   } else {
-    return appErrorService(400, '發生錯誤', next);
+    return appErrorService(400, 'delete failed', next);
   }
 });
 //教練課程列表
 const courseIndexSetting = {
   perPage: 15,
   getAuth: true,
+  getAuthField: 'user',
   searchFields: ['name'],
   filterFields: ['category', 'subCategory'],
   sortFields: ['createdAt', 'updatedAt'],
@@ -278,6 +302,7 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
   });
 });
 
+//接收金流通知
 export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
   const response = Object.assign({}, req.body);
   const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
@@ -316,9 +341,48 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
         new: true,
         upsert: true,
         runValidators: true,
-      },
+      }
     );
     return handleSuccess(res, 200, 'get data');
+  } catch (error) {
+    return appErrorService(400, (error as Error).message, next);
+  }
+});
+
+//金流導向
+export const spgatewayReturn = handleErrorAsync(async (req, res, next) => {
+  const response = Object.assign({}, req.body);
+  const thisShaEncrypt = createMpgShaEncrypt(response.TradeInfo);
+
+  // 使用 HASH 再次 SHA 加密字串，確保比對一致（確保不正確的請求觸發交易成功）
+  if (thisShaEncrypt !== response.TradeSha) {
+    console.log('付款失敗：TradeSha 不一致');
+    return appErrorService(400, '付款失敗：TradeSha 不一致', next);
+  }
+
+  // 解密交易內容
+  const data = createMpgAesDecrypt(response.TradeInfo);
+  const findSearch = { merchantId: data.Result.MerchantID, orderId: data.Result.MerchantOrderNo };
+  try {
+    const orderModelData = await OrderModel.findOne(findSearch);
+    if (!orderModelData || orderModelData.orderId !== data.Result.MerchantOrderNo) {
+      console.log('找不到訂單');
+      return appErrorService(400, '找不到訂單', next);
+    }
+    const { NEWEBPAY_RETURN_URL } = process.env;
+    const params = new URLSearchParams({
+      title: orderModelData.status === 'success' ? '交易成功' : '交易失敗',
+      message: orderModelData.message,
+      status: orderModelData.status,
+      orderId: orderModelData.orderId,
+      paymentType: orderModelData.paymentType,
+      payerAccount5Code: orderModelData.payerAccount5Code,
+      payBankCode: orderModelData.payBankCode,
+      payTime: orderModelData.payTime,
+      totalPrice: orderModelData.totalPrice,
+      tradeNo: orderModelData.tradeNo,
+    }).toString();
+    return res.redirect(`${NEWEBPAY_RETURN_URL}/order/success?${params}`);
   } catch (error) {
     return appErrorService(400, (error as Error).message, next);
   }

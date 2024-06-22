@@ -90,6 +90,8 @@ export interface IBookingCourse extends Document {
   course: ObjectId;
   coach: ObjectId;
   courseSchedule: ObjectId;
+  startTime: Date;
+  endTime: Date;
   meetingUrl: string;
   order: ObjectId;
   isCanceled: boolean;
