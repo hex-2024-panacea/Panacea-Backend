@@ -11,6 +11,7 @@ import { CourseScheduleModel } from '../models/courseSchedule.model';
 import { getFilters, pagination, getPage, getSort } from '../service/modelService';
 import { OrderModel } from '../models/order.model';
 import { UserModel } from '../models/users';
+import { BookingCourseModel } from '../models/bookingCourse.model';
 import { createMpgAesEncrypt, createMpgShaEncrypt, createMpgAesDecrypt, type genDataChainType } from '../util/crypto';
 
 //建立課程
@@ -170,16 +171,38 @@ export const coachGetCourse = handleErrorAsync(async (req, res, next) => {
 export const deleteCourse = handleErrorAsync(async (req, res, next) => {
   const { courseId } = req.params;
   const userId = req.user?.id;
-  //判斷是否有今天以後的預約課程 bookingSchedule，有的話不可刪除課程
-  //如果有學員購買了但尚未上完，也不可刪除
-  const course = await CourseModel.findOneAndDelete({
+  const course = await CourseModel.findOne({
     course: courseId,
     coach: userId,
   });
   if (course) {
-    //delete coursePrice,courseSchedule,bookingCourse
+    //判斷是否有今天以後的預約課程 bookingCourse，有的話不可刪除課程
+    //如果有學員購買了但尚未上完，也不可刪除=>order remainingCount > 0
+    const bookings = await BookingCourseModel.countDocuments({
+      startTime: {
+        $gte: new Date(),
+        isCanceled: false,
+        course: courseId,
+      },
+    }).exec();
+    const orders = await OrderModel.countDocuments({
+      course: courseId,
+      remainingCount: { $ne: '0' },
+    }).exec();
+    if (bookings > 0 || orders > 0) {
+      return appErrorService(400, 'delete failed', next);
+    }
+    //delete course
+    await course.deleteOne();
+    //delete coursePrice,courseSchedule
+    await CoursePriceModel.deleteMany({
+      course: courseId,
+    });
+    await CourseScheduleModel.deleteMany({
+      course: courseId,
+    });
   } else {
-    return appErrorService(400, '發生錯誤', next);
+    return appErrorService(400, 'delete failed', next);
   }
 });
 //教練課程列表
