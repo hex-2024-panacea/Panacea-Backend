@@ -10,11 +10,13 @@ import {
   purchaseCourse,
   spgatewayNotify,
   deleteCourse,
+  getCourses,
 } from '../controllers/course.controller';
 
 const router = express.Router();
 
 router.post('/api/coach/course', isAuth, isCoach, createCourse); //建立課程
+router.get('/api/course', getCourses); //取得課程列表
 router.post('/api/coach/course/purchase', isAuth, purchaseCourse); //購買課程
 router.post('/api/coach/course/notify', spgatewayNotify); //接收金流通知
 router.post('/api/coach/course/:courseId/price', isAuth, isCoach, editPrice); //建立編輯課程授課價格
