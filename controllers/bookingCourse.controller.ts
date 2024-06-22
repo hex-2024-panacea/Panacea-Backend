@@ -3,7 +3,6 @@ import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { BookingCourseModel } from '../models/bookingCourse.model';
 import { CourseScheduleModel } from '../models/courseSchedule.model';
-import { CourseModel } from '../models/course.model';
 import { OrderModel } from '../models/order.model';
 import { coachCancelZod, userCancelZod } from '../zods/bookingCourse.zod';
 import { updateOrderCount } from '../service/orderService';
