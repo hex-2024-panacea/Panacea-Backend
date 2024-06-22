@@ -358,9 +358,7 @@ export const spgatewayReturn = handleErrorAsync(async (req, res, next) => {
       totalPrice: orderModelData.totalPrice,
       tradeNo: orderModelData.tradeNo,
     }).toString();
-    console.log('orderModelData', orderModelData);
-    res.redirect(`${NEWEBPAY_RETURN_URL}/order/success?${params}`);
-    return handleSuccess(res, 200, 'get data');
+    return res.redirect(`${NEWEBPAY_RETURN_URL}/order/success?${params}`);
   } catch (error) {
     return appErrorService(400, (error as Error).message, next);
   }
