@@ -236,7 +236,7 @@ export const userCreate = handleErrorAsync(async (req, res, next) => {
   const { course: courseId, order: orderId, courseSchedule: scheduleId } = req.body;
   //check order can book
   const existOrder = await OrderModel.findOne({
-    _id: courseId,
+    _id: orderId,
     userId: userId,
   });
   if (existOrder) {
@@ -263,16 +263,16 @@ export const userCreate = handleErrorAsync(async (req, res, next) => {
           order: orderId,
           meetingUrl,
         });
-        await OrderModel.findOneAndUpdate(
-          {
-            _id: courseId,
-          },
-          {
-            remainingCount: (remainCount - 1).toString(),
-            bookingCount: (bookingCount + 1).toString(),
-          },
-        );
         if (booking) {
+          await OrderModel.findOneAndUpdate(
+            {
+              _id: courseId,
+            },
+            {
+              remainingCount: (remainCount - 1).toString(),
+              bookingCount: (bookingCount + 1).toString(),
+            },
+          );
           return handleSuccess(res, 200, 'book success');
         }
       }
