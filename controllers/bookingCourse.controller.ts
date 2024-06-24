@@ -236,11 +236,12 @@ export const userCreate = handleErrorAsync(async (req, res, next) => {
   const { course: courseId, order: orderId, courseSchedule: scheduleId } = req.body;
   //check order can book
   const existOrder = await OrderModel.findOne({
-    _id: courseId,
-    user: userId,
+    _id: orderId,
+    userId: userId,
   });
   if (existOrder) {
     const remainCount = parseInt(existOrder.remainingCount);
+    const bookingCount = parseInt(existOrder.bookingCount);
     if (!isNaN(remainCount) && remainCount > 0) {
       //check courseSchedule can book
       const existCourseSchedule = await CourseScheduleModel.findOne({
@@ -251,7 +252,7 @@ export const userCreate = handleErrorAsync(async (req, res, next) => {
       if (existCourseSchedule) {
         const { startTime, endTime, coach } = existCourseSchedule;
         //create meeting url QQ
-        const meetingUrl = 'meeting';
+        const meetingUrl = 'meetingUrl';
         const booking = await BookingCourseModel.create({
           user: userId,
           course: courseId,
@@ -263,6 +264,15 @@ export const userCreate = handleErrorAsync(async (req, res, next) => {
           meetingUrl,
         });
         if (booking) {
+          await OrderModel.findOneAndUpdate(
+            {
+              _id: courseId,
+            },
+            {
+              remainingCount: (remainCount - 1).toString(),
+              bookingCount: (bookingCount + 1).toString(),
+            },
+          );
           return handleSuccess(res, 200, 'book success');
         }
       }
