@@ -7,7 +7,7 @@ import { getFilters, pagination, getPage, getSort } from '../service/modelServic
 const orderIndexSetting = {
   perPage: 15,
   getAuth: true,
-  getAuthField: 'user',
+  getAuthField: 'userId',
   filterFields: ['status'],
   sortFields: ['createdAt', 'updatedAt'],
   timeFields: ['createdAt', 'updatedAt'],
