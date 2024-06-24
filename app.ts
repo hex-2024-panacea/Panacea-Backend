@@ -45,7 +45,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 //api rate limit
-app.use('/api', apiLimiter);
+if (process.env.NODE_ENV === 'pro') {
+  app.use('/api', apiLimiter);
+}
 //route
 app.use('/', usersRouter);
 app.use('/', uploadRouter);
