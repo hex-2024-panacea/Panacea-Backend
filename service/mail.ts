@@ -3,8 +3,7 @@ import path from 'path';
 import handleSuccess from './handleSuccess';
 import { Response } from 'express';
 import { temporarySignature } from './signature';
-import { google } from 'googleapis';
-const OAuth2 = google.auth.OAuth2;
+import { OAuth2Client } from 'google-auth-library';
 // const exphbs = require('express-handlebars');
 const nodemailerHandlebars = require('nodemailer-express-handlebars');
 
@@ -15,7 +14,7 @@ export const sendMail = async (options: object, res: Response) => {
   const GOOGLE_AUTH_CLIENT_SECRET = process.env.GOOGLE_AUTH_CLIENT_SECRET;
   const GOOGLE_AUTH_REFRESH_TOKEN = process.env.GOOGLE_AUTH_REFRESH_TOKEN;
 
-  const oauth2Client = new OAuth2(
+  const oauth2Client = new OAuth2Client(
     GOOGLE_AUTH_CLIENTID,
     GOOGLE_AUTH_CLIENT_SECRET,
     'https://developers.google.com/oauthplayground'
@@ -63,19 +62,19 @@ export const registerMailSend = async (email: string, userId: string, res: Respo
   const signatureOb = temporarySignature(verifyUrl, 60, { userId: userId });
 
   const { expires, signature } = signatureOb;
-  const webUrl = `${process.env.FRONTEND_URL}/verify/email/${userId}?expires=${expires}&signature=${signature}`;
+  const webUrl = `${process.env.FRONTEND_URL}/login?userId=${userId}&expires=${expires}&signature=${signature}`;
 
   let mailOptions = {
     from: mailSender,
     to: email,
-    subject: '這是郵件標題',
+    subject: '[Panacea] 驗證信箱',
     template: 'emailTemplate',
     context: {
       title: 'title',
-      header: 'header',
-      content: 'content',
+      header: '親愛的使用者您好，感謝您註冊 Panacea！請點擊以下按鈕來驗證您的電子郵件地址，以完成您的註冊：',
+      content: '如果您未註冊 Panacea，請忽略此郵件。此連結將在1小時後過期。',
       buttonLink: webUrl,
-      buttonText: 'button',
+      buttonText: '驗證信箱',
     },
   };
 
@@ -88,19 +87,19 @@ export const forgetPasswordSend = async (email: string, userId: string, res: Res
   const signatureOb = temporarySignature(url, 60, { userId: userId });
 
   const { expires, signature } = signatureOb;
-  const webUrl = `${process.env.FRONTEND_URL}/forget-passowrd/${userId}?expires=${expires}&signature=${signature}`;
+  const webUrl = `${process.env.FRONTEND_URL}/reset-password?userId=${userId}&expires=${expires}&signature=${signature}`;
 
   let mailOptions = {
     from: mailSender,
     to: email,
-    subject: '這是郵件標題',
+    subject: '[Panacea] 重設密碼',
     template: 'emailTemplate',
     context: {
       title: 'title',
-      header: 'header',
-      content: 'content',
+      header: '親愛的使用者您好，我們收到您的密碼重置請求。請點擊以下按鈕來重置您的密碼：',
+      content: '如果您未請求重置密碼，請忽略此郵件。此按鈕將在1小時後過期。',
       buttonLink: webUrl,
-      buttonText: 'button',
+      buttonText: '重設密碼',
     },
   };
 
