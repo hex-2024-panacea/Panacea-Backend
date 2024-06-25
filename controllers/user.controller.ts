@@ -4,7 +4,7 @@ import { UserModel } from '../models/users';
 import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { registerMailSend, forgetPasswordSend } from '../service/mail';
-import { generateJwtSend, revokeAllToken, revokeToken} from '../service/auth';
+import { generateJwtSend, revokeAllToken, revokeToken } from '../service/auth';
 import {
   registerZod,
   signinZod,
@@ -46,13 +46,15 @@ export const signIn = handleErrorAsync(async (req, res, next) => {
   signinZod.parse({ email, password });
 
   const user = await UserModel.findOne({ email });
-  const isMatch = await bcrypt.compare(password, user!.password as string);
-  if (user && isMatch) {
-    //產生 token
-    if (!user.emailVerifiedAt) {
-      await registerMailSend(email, user.id, res);
-    } else {
-      generateJwtSend(user.id, res);
+  if (user) {
+    const isMatch = await bcrypt.compare(password, user!.password as string);
+    if (isMatch) {
+      //產生 token
+      if (!user.emailVerifiedAt) {
+        await registerMailSend(email, user.id, res);
+      } else {
+        generateJwtSend(user.id, res);
+      }
     }
   } else {
     appErrorService(400, 'email or password is not correct', next);
@@ -86,7 +88,7 @@ export const verifyEmail = handleErrorAsync(async (req, res, next) => {
       },
       {
         emailVerifiedAt: Date.now(),
-      }
+      },
     );
     handleSuccess(res, 200, 'mail is verified');
   } else {
@@ -124,7 +126,7 @@ export const resetPassword = handleErrorAsync(async (req, res, next) => {
     },
     {
       password: newPassword,
-    }
+    },
   );
   if (user) {
     await revokeAllToken(user.id);
@@ -145,13 +147,10 @@ export const updatePassword = handleErrorAsync(async (req, res, next) => {
     if (isMatch) {
       const updatedAt = Date.now();
       const updatePassword = await bcrypt.hash(newPassword, 12);
-      await UserModel.findByIdAndUpdate(
-        _id,
-        {
-          password: updatePassword,
-          updatedAt,
-        }
-      );
+      await UserModel.findByIdAndUpdate(_id, {
+        password: updatePassword,
+        updatedAt,
+      });
       await revokeAllToken(_id!);
       handleSuccess(res, 200, 'password update.');
     } else {
@@ -172,7 +171,7 @@ export const userUpdate = handleErrorAsync(async (req, res, next) => {
     const currentUser = await UserModel.findOneAndUpdate(
       { _id },
       { $set: updateFields },
-      { new: true, select: isCoach ? COACH : USER }
+      { new: true, select: isCoach ? COACH : USER },
     );
     handleSuccess(res, 200, 'get data', currentUser);
   } catch (error) {
@@ -219,7 +218,7 @@ export const applyCoach = handleErrorAsync(async (req, res, next) => {
           approvalStatus: 'pending',
         },
       },
-      { runValidators: true, new: true }
+      { runValidators: true, new: true },
     );
     handleSuccess(res, 200, 'submit success');
   } catch (error) {
@@ -230,10 +229,10 @@ export const applyCoach = handleErrorAsync(async (req, res, next) => {
 //登出
 export const logout = handleErrorAsync(async (req, res, next) => {
   const result = await revokeToken(req);
-  
-  if(result){
+
+  if (result) {
     handleSuccess(res, 200, 'logout success');
-  }else{
+  } else {
     return appErrorService(400, 'logout failed', next);
   }
 });
