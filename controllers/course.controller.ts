@@ -37,6 +37,7 @@ export const getCourses = handleErrorAsync(async (req, res, next) => {
   const _page = parseInt(page as string);
   const _pageSize = 10; // 默認每頁 10 筆
   try {
+    console.log(courseModelFilter);
     const results = await CourseModel.find(courseModelFilter)
       .select('-reason -approvalStatus -__v')
       .skip((_page - 1) * _pageSize)
@@ -53,6 +54,28 @@ export const getCourses = handleErrorAsync(async (req, res, next) => {
     return appErrorService(400, (error as Error).message, next);
   }
 });
+
+// 取得課程詳情
+export const getCoursesDetails = handleErrorAsync(async (req, res, next) => {
+  const courseId = req.params.id;
+  if (!courseId) {
+    return appErrorService(400, '請填寫課程ID', next);
+  }
+  try {
+    const course = await CourseModel.findById(courseId)
+      .select('-reason -approvalStatus -__v')
+      .populate({ path: 'coach', select: '_id name specialty' })
+      .populate({ path: 'course', select: 'count price' });
+    console.log(course);
+    if (!course) {
+      return appErrorService(400, '找不到課程', next);
+    }
+    return handleSuccess(res, 200, 'get data', course);
+  } catch (error) {
+    return appErrorService(400, (error as Error).message, next);
+  }
+});
+
 //建立課程
 export const createCourse = handleErrorAsync(async (req, res, next) => {
   const _id = req.user?.id;

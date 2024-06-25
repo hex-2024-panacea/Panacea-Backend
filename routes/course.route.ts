@@ -11,10 +11,12 @@ import {
   spgatewayNotify,
   deleteCourse,
   spgatewayReturn,
+  getCourses,
 } from '../controllers/course.controller';
 
 const router = express.Router();
 
+// /api/coach/course
 router.post('/', isAuth, isCoach, createCourse); //建立課程
 router.post('/purchase', isAuth, purchaseCourse); //購買課程
 router.post('/notify', spgatewayNotify); //接收金流通知
