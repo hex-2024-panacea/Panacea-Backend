@@ -20,6 +20,7 @@ import adminRouter from './routes/admin.route';
 import courseRouter from './routes/course.route';
 import bookingCourseCoach from './routes/bookingCourseCoach.route';
 import bookingCourseUser from './routes/bookingCourseUser.route';
+import orderUser from './routes/orderUser.route';
 
 const file = fs.readFileSync('./spec/@typespec/openapi3/openapi.yaml', 'utf8');
 const swaggerDocument = YAML.parse(file);
@@ -44,7 +45,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 //api rate limit
-app.use('/api', apiLimiter);
+if (process.env.NODE_ENV === 'pro') {
+  app.use('/api', apiLimiter);
+}
 //route
 app.use('/', usersRouter);
 app.use('/', uploadRouter);
@@ -55,6 +58,7 @@ app.use('/api/coach/course', courseRouter);
 app.use('/api/coach/booking-course', bookingCourseCoach);
 app.use('/api/user/booking-course', bookingCourseUser);
 app.use('/order', express.static(path.join(__dirname, 'public/order.html')));
+app.use('/api/user/order', orderUser);
 app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 //404
 app.use(function (req: Request, res: Response, next: NextFunction) {
