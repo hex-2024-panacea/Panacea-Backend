@@ -209,7 +209,7 @@ export const deleteCourse = handleErrorAsync(async (req, res, next) => {
 const courseIndexSetting = {
   perPage: 15,
   getAuth: true,
-  getAuthField: 'user',
+  getAuthField: 'coach',
   searchFields: ['name'],
   filterFields: ['category', 'subCategory'],
   sortFields: ['createdAt', 'updatedAt'],
@@ -341,7 +341,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
         new: true,
         upsert: true,
         runValidators: true,
-      }
+      },
     );
     return handleSuccess(res, 200, 'get data');
   } catch (error) {
