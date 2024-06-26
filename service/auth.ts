@@ -83,6 +83,16 @@ export const isCoach = (req: UserRequest, res: Response, next: NextFunction) => 
   }
   return appErrorService(403, 'you are not a coach', next);
 };
+//isAdmin
+export const isAdmin = (req: UserRequest, res: Response, next: NextFunction) => {
+  if (req.user) {
+    const { isAdmin } = req.user;
+    if (isAdmin) {
+      return next();
+    }
+  }
+  return appErrorService(403, 'you are not a admin', next);
+};
 export const revokeAllToken = async (userId: string) => {
   await OauthAccessTokenModel.updateMany(
     {
@@ -91,7 +101,7 @@ export const revokeAllToken = async (userId: string) => {
     },
     {
       isRevoked: true,
-    }
+    },
   );
 };
 //revoke oauthAccessToken
@@ -107,7 +117,7 @@ export const revokeToken = async (req: UserRequest) => {
     },
     {
       isRevoked: true,
-    }
+    },
   );
 
   return accessToken;

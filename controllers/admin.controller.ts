@@ -3,6 +3,8 @@ import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { UserModel } from '../models/users';
 import { adminUpdateCoachInfoZod, adminReviewCoachZod } from '../zods/admin.zod';
+import { CourseModel } from '../models/course.model';
+import { getFilters, pagination, getPage, getSort } from '../service/modelService';
 
 const getUserModel = async (id: string, email: string, _page: number, _pageSize: number, isCoach: boolean) => {
   const query = id || email ? { _id: id, email, isCoach } : { isCoach };
@@ -54,7 +56,7 @@ export const adminUpdateUserInfo = handleErrorAsync(async (req, res, next) => {
         {
           updatedAt: Date.now(),
           ...req.body,
-        }
+        },
       );
       return handleSuccess(res, 200, 'Edited Successfully');
     } else {
@@ -106,7 +108,7 @@ export const adminUpdateCoachInfo = handleErrorAsync(async (req, res, next) => {
         {
           updatedAt: Date.now(),
           ...req.body,
-        }
+        },
       );
       return handleSuccess(res, 200, 'Edited Successfully');
     } else {
@@ -140,4 +142,40 @@ export const adminReviewCoach = handleErrorAsync(async (req, res, next) => {
   } catch (error) {
     return appErrorService(400, (error as Error).message, next);
   }
+});
+//後台 - 課程列表
+const courseIndexSetting = {
+  perPage: 15,
+  searchFields: ['name'],
+  filterFields: ['category', 'subCategory'],
+  sortFields: ['createdAt', 'updatedAt'],
+  timeFields: ['createdAt', 'updatedAt'],
+};
+export const getCourseList = handleErrorAsync(async (req, res, next) => {
+  const { page, perPage } = getPage(req, courseIndexSetting);
+  const filters = getFilters(req, courseIndexSetting);
+  const sort = getSort(req, courseIndexSetting);
+
+  const results = await CourseModel.find(filters)
+    .sort(sort)
+    .limit(perPage)
+    .skip(perPage * page)
+    .populate({
+      path: 'coach',
+      select: '_id name avatar',
+    })
+    .populate({
+      path: 'coursePrice',
+      select: '_id -course count price',
+      options: {
+        sort: {
+          count: 1,
+          price: 1,
+        },
+      },
+    });
+
+  const meta = await pagination(CourseModel, filters, page, courseIndexSetting);
+
+  return handleSuccess(res, 200, 'get data', results, meta);
 });

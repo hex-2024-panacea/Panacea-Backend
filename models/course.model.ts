@@ -75,7 +75,7 @@ CourseSchema.virtual('coursePrice', {
   localField: '_id',
   foreignField: 'course',
 });
-CourseSchema.virtual('user', {
+CourseSchema.virtual('coachDetail', {
   ref: 'User',
   localField: '_id',
   foreignField: 'coach',
