@@ -37,11 +37,11 @@ export const getCourses = handleErrorAsync(async (req, res, next) => {
   const _page = parseInt(page as string);
   const _pageSize = 10; // 默認每頁 10 筆
   try {
-    console.log(courseModelFilter);
     const results = await CourseModel.find(courseModelFilter)
       .select('-reason -approvalStatus -__v')
       .skip((_page - 1) * _pageSize)
-      .limit(_pageSize);
+      .limit(_pageSize)
+      .lean();
     const total = await CourseModel.countDocuments(courseModelFilter);
     const lastPage = Math.ceil(total / _pageSize);
     return handleSuccess(res, 200, 'get data', results, {
@@ -64,9 +64,9 @@ export const getCoursesDetails = handleErrorAsync(async (req, res, next) => {
   try {
     const course = await CourseModel.findById(courseId)
       .select('-reason -approvalStatus -__v')
+      .populate({ path: 'coursePrice', select: 'count price -course' })
       .populate({ path: 'coach', select: '_id name specialty' })
-      .populate({ path: 'course', select: 'count price' });
-    console.log(course);
+      .lean();
     if (!course) {
       return appErrorService(400, '找不到課程', next);
     }
