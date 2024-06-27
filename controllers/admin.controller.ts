@@ -213,3 +213,19 @@ export const getOrderList = handleErrorAsync(async (req, res, next) => {
 
   return handleSuccess(res, 200, 'get data', results, meta);
 });
+//後台 - 課程審核
+export const reviewCourse = handleErrorAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const { approvalStatus, reason }: updateDataType = req.body;
+  try {
+    adminReviewCoachZod.parse(req.body);
+    const updateData: updateDataType = {
+      approvalStatus,
+      reason: approvalStatus === 'fail' ? reason : '',
+    };
+    await CourseModel.findByIdAndUpdate({ _id: id }, { $set: updateData }, { new: true, runValidators: true });
+    return handleSuccess(res, 200, 'Edited Successfully');
+  } catch (error) {
+    return appErrorService(400, (error as Error).message, next);
+  }
+});
