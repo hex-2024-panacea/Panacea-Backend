@@ -151,13 +151,13 @@ const schema = new mongoose.Schema<IOrder>(
 
 schema.virtual('user', {
   ref: 'User',
-  localField: '_id',
-  foreignField: 'userId',
+  localField: 'userId',
+  foreignField: '_id',
 });
 schema.virtual('course', {
   ref: 'Course',
-  localField: '_id',
-  foreignField: 'courseId',
+  localField: 'courseId',
+  foreignField: '_id',
 });
 
 export const OrderModel = mongoose.model('Order', schema);
