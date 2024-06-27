@@ -73,23 +73,23 @@ const BookingCourse = new mongoose.Schema<IBookingCourse>(
 
 BookingCourse.virtual('coachDetail', {
   ref: 'User',
-  localField: '_id',
-  foreignField: 'coach',
+  localField: 'coach',
+  foreignField: '_id',
 });
 BookingCourse.virtual('userDetail', {
   ref: 'User',
-  localField: '_id',
-  foreignField: 'user',
+  localField: 'user',
+  foreignField: '_id',
 });
 BookingCourse.virtual('courseDetail', {
   ref: 'Course',
-  localField: '_id',
-  foreignField: 'course',
+  localField: 'course',
+  foreignField: '_id',
 });
 BookingCourse.virtual('courseScheduleDetail', {
   ref: 'CourseSchedule',
-  localField: '_id',
-  foreignField: 'courseSchedule',
+  localField: 'courseSchedule',
+  foreignField: '_id',
 });
 
 export const BookingCourseModel = mongoose.model('BookingCourse', BookingCourse);
