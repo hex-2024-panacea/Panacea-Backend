@@ -100,7 +100,7 @@ export const coachGetShow = handleErrorAsync(async (req, res, next) => {
     .select('-coach -order -courseSchedule')
     .populate({
       path: 'course',
-      select: '_id name content coverImage category subCategory',
+      select: '_id name description coverImage category subCategory',
     })
     .populate({
       path: 'user',
@@ -125,7 +125,7 @@ export const userGetShow = handleErrorAsync(async (req, res, next) => {
     .select('-user -order -courseSchedule')
     .populate({
       path: 'course',
-      select: '_id name content coverImage category subCategory',
+      select: '_id name description coverImage category subCategory',
     })
     .populate({
       path: 'coach',
@@ -173,7 +173,7 @@ export const coachGetIndex = handleErrorAsync(async (req, res, next) => {
     .select('-coach -courseSchedule')
     .populate({
       path: 'course',
-      select: '_id name content coverImage category subCategory',
+      select: '_id name description coverImage category subCategory',
     })
     .populate({
       path: 'user',
@@ -219,10 +219,10 @@ export const userGetIndex = handleErrorAsync(async (req, res, next) => {
     .select('-coach -courseSchedule')
     .populate({
       path: 'course',
-      select: '_id name content coverImage category subCategory',
+      select: '_id name description coverImage category subCategory',
     })
     .populate({
-      path: 'user',
+      path: 'coach',
       select: '_id name avatar',
     });
 
