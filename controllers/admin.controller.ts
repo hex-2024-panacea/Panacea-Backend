@@ -198,11 +198,15 @@ export const getOrderList = handleErrorAsync(async (req, res, next) => {
     .skip(perPage * page)
     .populate({
       path: 'course',
-      select: '_id name',
+      select: '_id name description coverImage category subCategory',
+      populate: {
+        path: 'coach',
+        select: '_id name avatar',
+      },
     })
     .populate({
       path: 'user',
-      select: '_id name',
+      select: '_id name avatar',
     });
 
   const meta = await pagination(CourseModel, filters, page, courseIndexSetting);
