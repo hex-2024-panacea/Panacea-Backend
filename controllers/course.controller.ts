@@ -14,6 +14,68 @@ import { UserModel } from '../models/users';
 import { BookingCourseModel } from '../models/bookingCourse.model';
 import { createMpgAesEncrypt, createMpgShaEncrypt, createMpgAesDecrypt, type genDataChainType } from '../util/crypto';
 
+// 取得課程列表
+export const getCourses = handleErrorAsync(async (req, res, next) => {
+  const { category, courseName, page } = req.query;
+  if (!page) {
+    return appErrorService(400, '請輸入頁碼', next);
+  }
+  type courseModelFilterType = {
+    category?: string;
+    name?: { $regex: string; $options: 'i' };
+    approvalStatus: 'success';
+  };
+  const courseModelFilter: courseModelFilterType = {
+    approvalStatus: 'success',
+  };
+  if (category) {
+    courseModelFilter.category = category as string;
+  }
+  if (courseName) {
+    courseModelFilter.name = { $regex: courseName as string, $options: 'i' };
+  }
+  const _page = parseInt(page as string);
+  const _pageSize = 10; // 默認每頁 10 筆
+  try {
+    const results = await CourseModel.find(courseModelFilter)
+      .select('-reason -approvalStatus -__v')
+      .skip((_page - 1) * _pageSize)
+      .limit(_pageSize)
+      .lean();
+    const total = await CourseModel.countDocuments(courseModelFilter);
+    const lastPage = Math.ceil(total / _pageSize);
+    return handleSuccess(res, 200, 'get data', results, {
+      currentPage: _page, // 當前頁面
+      lastPage, // 最後一頁頁數
+      perPage: _pageSize, // 每頁多少筆資料
+      total, // 總共多少筆
+    });
+  } catch (error) {
+    return appErrorService(400, (error as Error).message, next);
+  }
+});
+
+// 取得課程詳情
+export const getCoursesDetails = handleErrorAsync(async (req, res, next) => {
+  const courseId = req.params.id;
+  if (!courseId) {
+    return appErrorService(400, '請填寫課程ID', next);
+  }
+  try {
+    const course = await CourseModel.findById(courseId)
+      .select('-reason -approvalStatus -__v')
+      .populate({ path: 'coursePrice', select: 'count price -course' })
+      .populate({ path: 'coach', select: '_id name specialty' })
+      .lean();
+    if (!course) {
+      return appErrorService(400, '找不到課程', next);
+    }
+    return handleSuccess(res, 200, 'get data', course);
+  } catch (error) {
+    return appErrorService(400, (error as Error).message, next);
+  }
+});
+
 //建立課程
 export const createCourse = handleErrorAsync(async (req, res, next) => {
   const _id = req.user?.id;
