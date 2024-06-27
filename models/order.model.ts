@@ -142,8 +142,22 @@ const schema = new mongoose.Schema<IOrder>(
     },
   },
   {
+    id: false,
     versionKey: false,
-  }
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
+
+schema.virtual('user', {
+  ref: 'User',
+  localField: '_id',
+  foreignField: 'userId',
+});
+schema.virtual('course', {
+  ref: 'Course',
+  localField: '_id',
+  foreignField: 'courseId',
+});
 
 export const OrderModel = mongoose.model('Order', schema);

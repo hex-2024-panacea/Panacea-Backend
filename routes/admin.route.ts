@@ -7,6 +7,7 @@ import {
   adminUpdateUserInfo,
   adminCoachList,
   getCourseList,
+  getOrderList,
 } from '../controllers/admin.controller';
 
 const router = express.Router();
@@ -16,6 +17,7 @@ router.put('/user/:id', isAuth, adminUpdateUserInfo); // 後台 - 學員編輯�
 router.get('/coach/list', isAuth, adminCoachList); // 後台 - 更新教練資料
 router.put('/coach/:id', isAuth, adminUpdateCoachInfo); // 後台 - 更新教練資料
 router.put('/coach/review/:id', isAuth, adminReviewCoach); // 後台 - 老師資料審核
-router.put('/course/list', isAuth, isAdmin, getCourseList); // 後台 - 課程列表
+router.get('/course/list', isAuth, isAdmin, getCourseList); // 後台 - 課程列表
+router.get('/order/list', isAuth, isAdmin, getOrderList); // 後台 - 訂單列表
 
 export default router;

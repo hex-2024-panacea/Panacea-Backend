@@ -4,6 +4,7 @@ import handleSuccess from '../service/handleSuccess';
 import { UserModel } from '../models/users';
 import { adminUpdateCoachInfoZod, adminReviewCoachZod } from '../zods/admin.zod';
 import { CourseModel } from '../models/course.model';
+import { OrderModel } from '../models/order.model';
 import { getFilters, pagination, getPage, getSort } from '../service/modelService';
 
 const getUserModel = async (id: string, email: string, _page: number, _pageSize: number, isCoach: boolean) => {
@@ -173,6 +174,35 @@ export const getCourseList = handleErrorAsync(async (req, res, next) => {
           price: 1,
         },
       },
+    });
+
+  const meta = await pagination(CourseModel, filters, page, courseIndexSetting);
+
+  return handleSuccess(res, 200, 'get data', results, meta);
+});
+//後台 - 訂單列表
+const orderIndexSetting = {
+  perPage: 15,
+  filterFields: ['status'],
+  sortFields: ['createdAt', 'updatedAt'],
+  timeFields: ['createdAt', 'updatedAt'],
+};
+export const getOrderList = handleErrorAsync(async (req, res, next) => {
+  const { page, perPage } = getPage(req, orderIndexSetting);
+  const filters = getFilters(req, orderIndexSetting);
+  const sort = getSort(req, orderIndexSetting);
+
+  const results = await OrderModel.find(filters)
+    .sort(sort)
+    .limit(perPage)
+    .skip(perPage * page)
+    .populate({
+      path: 'course',
+      select: '_id name',
+    })
+    .populate({
+      path: 'user',
+      select: '_id name',
     });
 
   const meta = await pagination(CourseModel, filters, page, courseIndexSetting);
