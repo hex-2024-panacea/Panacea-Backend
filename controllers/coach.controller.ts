@@ -1,7 +1,7 @@
 import handleErrorAsync from '../service/handleErrorAsync';
 import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
-import { UserModel } from '../models/users';
+import { UserModel } from '../models/users.model';
 
 // 更新教練銀行帳戶
 export const updateCoachBankAccount = handleErrorAsync(async (req, res, next) => {

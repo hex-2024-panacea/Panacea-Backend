@@ -2,9 +2,6 @@ import crypto from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
 import appErrorService from '../service/appErrorService';
 
-import dotenv from 'dotenv';
-dotenv.config();
-
 type Dict<T> = {
   [key: string]: T;
 };
