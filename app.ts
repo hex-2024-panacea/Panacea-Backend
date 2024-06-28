@@ -59,8 +59,8 @@ app.use('/api/course', courseRouter);
 app.use('/api/coach/course', coachCourseRouter);
 app.use('/api/coach/booking-course', bookingCourseCoach);
 app.use('/api/user/booking-course', bookingCourseUser);
-app.use('/order', express.static(path.join(__dirname, 'public/order.html')));
 app.use('/api/user/order', orderUser);
+app.use('/order', express.static(path.join(__dirname, 'public/order.html')));
 app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 //404
 app.use(function (req: Request, res: Response, next: NextFunction) {

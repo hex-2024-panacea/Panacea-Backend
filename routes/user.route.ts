@@ -17,7 +17,7 @@ import throttle from '../service/throttle';
 import { isAuth } from '../service/auth';
 const router = express.Router();
 
-//user signin,signup
+// /api/auth
 router.post('/register', register); // 註冊學員
 router.post('/sign-in', throttle, signIn); // 登入
 router.post('/verify-email', throttle, sendVerifyEmail); // 寄送Email驗證信
