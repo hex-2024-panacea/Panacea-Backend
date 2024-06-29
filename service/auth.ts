@@ -3,8 +3,8 @@ import type { Response, NextFunction } from 'express';
 import appErrorService from './appErrorService';
 import handleSuccess from './handleSuccess';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
-import OauthAccessTokenModel from '../models/oauthAccessToken';
-import { UserModel } from '../models/users';
+import OauthAccessTokenModel from '../models/oauthAccessToken.model';
+import { UserModel } from '../models/users.model';
 import type UserRequest from '../types/UserRequest';
 //checkUserExist
 //create oauthAccessToken
@@ -101,7 +101,7 @@ export const revokeAllToken = async (userId: string) => {
     },
     {
       isRevoked: true,
-    },
+    }
   );
 };
 //revoke oauthAccessToken
@@ -117,7 +117,7 @@ export const revokeToken = async (req: UserRequest) => {
     },
     {
       isRevoked: true,
-    },
+    }
   );
 
   return accessToken;

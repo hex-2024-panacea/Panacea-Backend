@@ -10,7 +10,7 @@ import { CoursePriceModel } from '../models/coursePrice.model';
 import { CourseScheduleModel } from '../models/courseSchedule.model';
 import { getFilters, pagination, getPage, getSort } from '../service/modelService';
 import { OrderModel } from '../models/order.model';
-import { UserModel } from '../models/users';
+import { UserModel } from '../models/users.model';
 import { BookingCourseModel } from '../models/bookingCourse.model';
 import { createMpgAesEncrypt, createMpgShaEncrypt, createMpgAesDecrypt, type genDataChainType } from '../util/crypto';
 
@@ -403,7 +403,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
         new: true,
         upsert: true,
         runValidators: true,
-      },
+      }
     );
     return handleSuccess(res, 200, 'get data');
   } catch (error) {

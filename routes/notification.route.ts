@@ -10,10 +10,11 @@ import {
 
 const router = express.Router();
 
-router.get('/api/notifications', isAuth, getNotifications); // 取得通知列表
-router.post('/api/notifications/read-all', isAuth, readAllNotifications); // 已讀全部通知
-router.delete('/api/notifications/delete-all', isAuth, deleteAllNotifications); // 刪除全部通知
-router.post('/api/notifications/:id', isAuth, readNotification); //已讀通知
-router.delete('/api/notifications/:id', isAuth, deleteNotification); // 刪除通知
+// /api/notifications
+router.get('/', isAuth, getNotifications); // 取得通知列表
+router.post('/read-all', isAuth, readAllNotifications); // 已讀全部通知
+router.delete('/delete-all', isAuth, deleteAllNotifications); // 刪除全部通知
+router.post('/:id', isAuth, readNotification); //已讀通知
+router.delete('/:id', isAuth, deleteNotification); // 刪除通知
 
 export default router;

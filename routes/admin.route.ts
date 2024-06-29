@@ -13,6 +13,7 @@ import {
 
 const router = express.Router();
 
+// /api/admin
 router.get('/user/list', isAuth, adminUserList); // 後台 - 學員列表
 router.put('/user/:id', isAuth, adminUpdateUserInfo); // 後台 - 學員編輯資料
 router.get('/coach/list', isAuth, adminCoachList); // 後台 - 更新教練資料

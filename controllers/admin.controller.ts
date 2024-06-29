@@ -1,7 +1,7 @@
 import handleErrorAsync from '../service/handleErrorAsync';
 import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
-import { UserModel } from '../models/users';
+import { UserModel } from '../models/users.model';
 import { adminUpdateCoachInfoZod, adminReviewCoachZod } from '../zods/admin.zod';
 import { CourseModel } from '../models/course.model';
 import { OrderModel } from '../models/order.model';
@@ -57,7 +57,7 @@ export const adminUpdateUserInfo = handleErrorAsync(async (req, res, next) => {
         {
           updatedAt: Date.now(),
           ...req.body,
-        },
+        }
       );
       return handleSuccess(res, 200, 'Edited Successfully');
     } else {
@@ -109,7 +109,7 @@ export const adminUpdateCoachInfo = handleErrorAsync(async (req, res, next) => {
         {
           updatedAt: Date.now(),
           ...req.body,
-        },
+        }
       );
       return handleSuccess(res, 200, 'Edited Successfully');
     } else {
