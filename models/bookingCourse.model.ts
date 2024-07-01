@@ -75,21 +75,25 @@ BookingCourse.virtual('coachDetail', {
   ref: 'User',
   localField: 'coach',
   foreignField: '_id',
+  justOne: true,
 });
 BookingCourse.virtual('userDetail', {
   ref: 'User',
   localField: 'user',
   foreignField: '_id',
+  justOne: true,
 });
 BookingCourse.virtual('courseDetail', {
   ref: 'Course',
   localField: 'course',
   foreignField: '_id',
+  justOne: true,
 });
 BookingCourse.virtual('courseScheduleDetail', {
   ref: 'CourseSchedule',
   localField: 'courseSchedule',
   foreignField: '_id',
+  justOne: true,
 });
 
 export const BookingCourseModel = mongoose.model('BookingCourse', BookingCourse);
