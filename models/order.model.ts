@@ -153,11 +153,13 @@ schema.virtual('user', {
   ref: 'User',
   localField: 'userId',
   foreignField: '_id',
+  justOne: true,
 });
 schema.virtual('course', {
   ref: 'Course',
   localField: 'courseId',
   foreignField: '_id',
+  justOne: true,
 });
 
 export const OrderModel = mongoose.model('Order', schema);

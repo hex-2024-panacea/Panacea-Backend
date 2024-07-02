@@ -79,6 +79,7 @@ CourseSchema.virtual('coachDetail', {
   ref: 'User',
   localField: '_id',
   foreignField: 'coach',
+  justOne: true,
 });
 
 export const CourseModel = mongoose.model('Course', CourseSchema);

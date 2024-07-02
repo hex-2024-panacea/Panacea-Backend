@@ -22,8 +22,8 @@ export const scheduleZod = z.object({
   id: z.custom<ObjectId>().optional(),
   coach: z.custom<ObjectId>(),
   course: z.custom<ObjectId>(),
-  startTime: z.string().datetime(),
-  endTime: z.string().datetime(),
+  startTime: z.string().datetime({ offset: true }),
+  endTime: z.string().datetime({ offset: true }),
 });
 export const editScheduleZod = z.array(scheduleZod);
 export const getScheduleZod = z.object({
