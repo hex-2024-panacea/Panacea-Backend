@@ -350,6 +350,7 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
     merchantId: MERCHANT_ID,
     totalPrice: orderInfo[timeStamp].Amt,
     purchaseCount: amount,
+    remainingCount: amount,
     price,
     name,
     tradeInfo: TradeInfo,
@@ -403,7 +404,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
         new: true,
         upsert: true,
         runValidators: true,
-      }
+      },
     );
     return handleSuccess(res, 200, 'get data');
   } catch (error) {
