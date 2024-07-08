@@ -266,7 +266,7 @@ export const userCreate = handleErrorAsync(async (req, res, next) => {
         if (booking) {
           await OrderModel.findOneAndUpdate(
             {
-              _id: courseId,
+              _id: orderId,
             },
             {
               remainingCount: (remainCount - 1).toString(),
