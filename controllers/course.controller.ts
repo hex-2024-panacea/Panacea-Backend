@@ -234,21 +234,22 @@ export const deleteCourse = handleErrorAsync(async (req, res, next) => {
   const { courseId } = req.params;
   const userId = req.user?.id;
   const course = await CourseModel.findOne({
-    course: courseId,
+    _id: courseId,
     coach: userId,
   });
   if (course) {
     //判斷是否有今天以後的預約課程 bookingCourse，有的話不可刪除課程
     //如果有學員購買了但尚未上完，也不可刪除=>order remainingCount > 0
+    const today = new Date();
     const bookings = await BookingCourseModel.countDocuments({
       startTime: {
-        $gte: new Date(),
-        isCanceled: false,
-        course: courseId,
+        $gte: today,
       },
+      isCanceled: false,
+      course: courseId,
     }).exec();
     const orders = await OrderModel.countDocuments({
-      course: courseId,
+      courseId: courseId,
       remainingCount: { $ne: '0' },
     }).exec();
     if (bookings > 0 || orders > 0) {
@@ -263,6 +264,7 @@ export const deleteCourse = handleErrorAsync(async (req, res, next) => {
     await CourseScheduleModel.deleteMany({
       course: courseId,
     });
+    return handleSuccess(res, 200, 'delete success');
   } else {
     return appErrorService(400, 'delete failed', next);
   }
