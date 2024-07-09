@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import type { ICourse } from './type';
-import coursePrice from '../types/CoursePrice';
 
 const CourseSchema = new mongoose.Schema<ICourse>(
   {
@@ -67,7 +66,7 @@ const CourseSchema = new mongoose.Schema<ICourse>(
     versionKey: false,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
+  }
 );
 
 CourseSchema.virtual('coursePrice', {
@@ -82,4 +81,16 @@ CourseSchema.virtual('coachDetail', {
   justOne: true,
 });
 
+CourseSchema.virtual('commentsNum', {
+  ref: 'CourseEvaluation',
+  localField: 'coach',
+  foreignField: 'userId',
+  count: true,
+});
+
+CourseSchema.virtual('recurrenceSchedules', {
+  ref: 'CourseSchedule',
+  localField: 'coach',
+  foreignField: 'coach',
+});
 export const CourseModel = mongoose.model('Course', CourseSchema);
