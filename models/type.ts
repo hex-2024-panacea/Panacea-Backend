@@ -63,6 +63,8 @@ export interface ICourse extends Document {
   subCategory: string[];
   startDate: Date;
   isActive: boolean;
+  commentsNum: number;
+  recurrenceSchedules: string[];
   approvalStatus: 'pending' | 'success' | 'fail';
   reason: string;
   rating: Number;
@@ -132,4 +134,13 @@ export interface IOrder extends Document {
   payBankCode: string;
   payTime: string;
   message: string;
+}
+
+export interface ICourseEvaluation extends Document {
+  createdAt: Date;
+  updatedAt: Date;
+  userId: ObjectId;
+  courseId: ObjectId;
+  star: number;
+  comment: string;
 }

@@ -11,6 +11,7 @@ import { CourseScheduleModel } from '../models/courseSchedule.model';
 import { getFilters, pagination, getPage, getSort } from '../service/modelService';
 import { OrderModel } from '../models/order.model';
 import { UserModel } from '../models/users.model';
+import { CourseEvaluationModel } from '../models/courseEvaluation.model';
 import { BookingCourseModel } from '../models/bookingCourse.model';
 import { createMpgAesEncrypt, createMpgShaEncrypt, createMpgAesDecrypt, type genDataChainType } from '../util/crypto';
 
@@ -38,10 +39,17 @@ export const getCourses = handleErrorAsync(async (req, res, next) => {
   const _pageSize = 10; // 默認每頁 10 筆
   try {
     const results = await CourseModel.find(courseModelFilter)
+      .populate({
+        path: 'recurrenceSchedules',
+        match: { isBooked: false },
+        select: '-isBooked',
+      })
+      .populate({ path: 'commentsNum' })
       .select('-reason -approvalStatus -__v')
       .skip((_page - 1) * _pageSize)
       .limit(_pageSize)
       .lean();
+
     const total = await CourseModel.countDocuments(courseModelFilter);
     const lastPage = Math.ceil(total / _pageSize);
     return handleSuccess(res, 200, 'get data', results, {
@@ -294,6 +302,35 @@ export const coachGetCourses = handleErrorAsync(async (req, res, next) => {
 
   return handleSuccess(res, 200, 'get data', results, meta);
 });
+
+// 教練-編輯課程
+export const editCourse = handleErrorAsync(async (req, res, next) => {
+  const userId = req.user?.id;
+  const courseId = req.params.courseId;
+  const { name, coverImage, description, content, courseCategories, isActive } = req.body;
+  const courseModelData = await CourseModel.findOneAndUpdate(
+    {
+      _id: courseId,
+      coach: userId,
+    },
+    {
+      name,
+      coverImage,
+      description,
+      content,
+      courseCategories,
+      isActive,
+    },
+    {
+      new: true,
+    }
+  );
+  if (!courseModelData) {
+    return appErrorService(400, 'update failed', next);
+  }
+  return handleSuccess(res, 200, 'get data', courseModelData);
+});
+
 //教練-取得課程授課時間
 export const getSchedule = handleErrorAsync(async (req, res, next) => {
   const courseId = req.params.courseId;
@@ -406,7 +443,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
         new: true,
         upsert: true,
         runValidators: true,
-      },
+      }
     );
     return handleSuccess(res, 200, 'get data');
   } catch (error) {
@@ -451,4 +488,31 @@ export const spgatewayReturn = handleErrorAsync(async (req, res, next) => {
   } catch (error) {
     return appErrorService(400, (error as Error).message, next);
   }
+});
+
+// 評價課程
+export const coursesEvaluation = handleErrorAsync(async (req, res, next) => {
+  const userId = req.user?.id;
+  const courseId = req.params.courseId;
+  const { star, comment } = req.body;
+  const courseModelData = await CourseModel.findById(courseId).lean();
+  if (!courseModelData) {
+    return appErrorService(400, '找不到課程', next);
+  }
+  const orderModelData = await OrderModel.findOne({
+    userId,
+    courseId,
+    status: 'success',
+    remainingCount: '0',
+  }).lean();
+  if (!orderModelData) {
+    return appErrorService(400, '找不到訂單', next);
+  }
+  await CourseEvaluationModel.create({
+    userId,
+    courseId,
+    star,
+    comment,
+  });
+  return handleSuccess(res, 200, '評論成功');
 });
