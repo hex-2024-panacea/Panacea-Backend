@@ -1,6 +1,6 @@
 import handleErrorAsync from '../service/handleErrorAsync';
 import bcrypt from 'bcryptjs';
-import { UserModel } from '../models/users';
+import { UserModel } from '../models/users.model';
 import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
 import { registerMailSend, forgetPasswordSend } from '../service/mail';
@@ -12,7 +12,7 @@ import {
   resetPasswordZod,
   updatePasswordZod,
   registerCoachZod,
-} from '../zods/users';
+} from '../zods/users.zod';
 const USER =
   '-password -subject -specialty -language -workExperience -education -certifiedDocuments -bankName -bankCode -bankAccount -actualAmount -earnings -approvalStatus';
 const COACH = '-password';
@@ -88,7 +88,7 @@ export const verifyEmail = handleErrorAsync(async (req, res, next) => {
       },
       {
         emailVerifiedAt: Date.now(),
-      },
+      }
     );
     handleSuccess(res, 200, 'mail is verified');
   } else {
@@ -126,7 +126,7 @@ export const resetPassword = handleErrorAsync(async (req, res, next) => {
     },
     {
       password: newPassword,
-    },
+    }
   );
   if (user) {
     await revokeAllToken(user.id);
@@ -171,7 +171,7 @@ export const userUpdate = handleErrorAsync(async (req, res, next) => {
     const currentUser = await UserModel.findOneAndUpdate(
       { _id },
       { $set: updateFields },
-      { new: true, select: isCoach ? COACH : USER },
+      { new: true, select: isCoach ? COACH : USER }
     );
     handleSuccess(res, 200, 'get data', currentUser);
   } catch (error) {
@@ -218,7 +218,7 @@ export const applyCoach = handleErrorAsync(async (req, res, next) => {
           approvalStatus: 'pending',
         },
       },
-      { runValidators: true, new: true },
+      { runValidators: true, new: true }
     );
     handleSuccess(res, 200, 'submit success');
   } catch (error) {

@@ -3,8 +3,8 @@ import type { Response, NextFunction } from 'express';
 import appErrorService from './appErrorService';
 import handleSuccess from './handleSuccess';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
-import OauthAccessTokenModel from '../models/oauthAccessToken';
-import { UserModel } from '../models/users';
+import OauthAccessTokenModel from '../models/oauthAccessToken.model';
+import { UserModel } from '../models/users.model';
 import type UserRequest from '../types/UserRequest';
 //checkUserExist
 //create oauthAccessToken
@@ -82,6 +82,16 @@ export const isCoach = (req: UserRequest, res: Response, next: NextFunction) => 
     }
   }
   return appErrorService(403, 'you are not a coach', next);
+};
+//isAdmin
+export const isAdmin = (req: UserRequest, res: Response, next: NextFunction) => {
+  if (req.user) {
+    const { isAdmin } = req.user;
+    if (isAdmin) {
+      return next();
+    }
+  }
+  return appErrorService(403, 'you are not a admin', next);
 };
 export const revokeAllToken = async (userId: string) => {
   await OauthAccessTokenModel.updateMany(

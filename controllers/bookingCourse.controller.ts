@@ -5,8 +5,10 @@ import { BookingCourseModel } from '../models/bookingCourse.model';
 import { CourseScheduleModel } from '../models/courseSchedule.model';
 import { OrderModel } from '../models/order.model';
 import { coachCancelZod, userCancelZod } from '../zods/bookingCourse.zod';
+import { NotificationsModel } from '../models/notifications.model';
 import { updateOrderCount } from '../service/orderService';
 import { getFilters, pagination, getPage, getSort } from '../service/modelService';
+import { CourseModel } from '../models/course.model';
 
 //教練取消授課
 export const coachCancel = handleErrorAsync(async (req, res, next) => {
@@ -100,7 +102,7 @@ export const coachGetShow = handleErrorAsync(async (req, res, next) => {
     .select('-coach -order -courseSchedule')
     .populate({
       path: 'course',
-      select: '_id name content coverImage category subCategory',
+      select: '_id name description coverImage category subCategory',
     })
     .populate({
       path: 'user',
@@ -125,7 +127,7 @@ export const userGetShow = handleErrorAsync(async (req, res, next) => {
     .select('-user -order -courseSchedule')
     .populate({
       path: 'course',
-      select: '_id name content coverImage category subCategory',
+      select: '_id name description coverImage category subCategory',
     })
     .populate({
       path: 'coach',
@@ -173,7 +175,7 @@ export const coachGetIndex = handleErrorAsync(async (req, res, next) => {
     .select('-coach -courseSchedule')
     .populate({
       path: 'course',
-      select: '_id name content coverImage category subCategory',
+      select: '_id name description coverImage category subCategory',
     })
     .populate({
       path: 'user',
@@ -219,10 +221,10 @@ export const userGetIndex = handleErrorAsync(async (req, res, next) => {
     .select('-coach -courseSchedule')
     .populate({
       path: 'course',
-      select: '_id name content coverImage category subCategory',
+      select: '_id name description coverImage category subCategory',
     })
     .populate({
-      path: 'user',
+      path: 'coach',
       select: '_id name avatar',
     });
 
@@ -249,7 +251,8 @@ export const userCreate = handleErrorAsync(async (req, res, next) => {
         course: courseId,
         isBooked: false,
       });
-      if (existCourseSchedule) {
+      const course = await CourseModel.findById(courseId);
+      if (existCourseSchedule && course) {
         const { startTime, endTime, coach } = existCourseSchedule;
         //create meeting url QQ
         const meetingUrl = 'meetingUrl';
@@ -266,13 +269,19 @@ export const userCreate = handleErrorAsync(async (req, res, next) => {
         if (booking) {
           await OrderModel.findOneAndUpdate(
             {
-              _id: courseId,
+              _id: orderId,
             },
             {
               remainingCount: (remainCount - 1).toString(),
               bookingCount: (bookingCount + 1).toString(),
             },
           );
+          await NotificationsModel.create({
+            receiver: userId,
+            title: course.name,
+            type: 'bookingSuccess',
+            status: 'active',
+          });
           return handleSuccess(res, 200, 'book success');
         }
       }

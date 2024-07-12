@@ -10,9 +10,79 @@ import { CoursePriceModel } from '../models/coursePrice.model';
 import { CourseScheduleModel } from '../models/courseSchedule.model';
 import { getFilters, pagination, getPage, getSort } from '../service/modelService';
 import { OrderModel } from '../models/order.model';
-import { UserModel } from '../models/users';
+import { UserModel } from '../models/users.model';
+import { CourseEvaluationModel } from '../models/courseEvaluation.model';
 import { BookingCourseModel } from '../models/bookingCourse.model';
 import { createMpgAesEncrypt, createMpgShaEncrypt, createMpgAesDecrypt, type genDataChainType } from '../util/crypto';
+
+// 取得課程列表
+export const getCourses = handleErrorAsync(async (req, res, next) => {
+  const { category, courseName, page } = req.query;
+  if (!page) {
+    return appErrorService(400, '請輸入頁碼', next);
+  }
+  type courseModelFilterType = {
+    category?: string;
+    name?: { $regex: string; $options: 'i' };
+    approvalStatus: 'success';
+  };
+  const courseModelFilter: courseModelFilterType = {
+    approvalStatus: 'success',
+  };
+  if (category) {
+    courseModelFilter.category = category as string;
+  }
+  if (courseName) {
+    courseModelFilter.name = { $regex: courseName as string, $options: 'i' };
+  }
+  const _page = parseInt(page as string);
+  const _pageSize = 10; // 默認每頁 10 筆
+  try {
+    const results = await CourseModel.find(courseModelFilter)
+      .populate({
+        path: 'recurrenceSchedules',
+        match: { isBooked: false },
+        select: '-isBooked',
+      })
+      .populate({ path: 'commentsNum' })
+      .select('-reason -approvalStatus -__v')
+      .skip((_page - 1) * _pageSize)
+      .limit(_pageSize)
+      .lean();
+
+    const total = await CourseModel.countDocuments(courseModelFilter);
+    const lastPage = Math.ceil(total / _pageSize);
+    return handleSuccess(res, 200, 'get data', results, {
+      currentPage: _page, // 當前頁面
+      lastPage, // 最後一頁頁數
+      perPage: _pageSize, // 每頁多少筆資料
+      total, // 總共多少筆
+    });
+  } catch (error) {
+    return appErrorService(400, (error as Error).message, next);
+  }
+});
+
+// 取得課程詳情
+export const getCoursesDetails = handleErrorAsync(async (req, res, next) => {
+  const courseId = req.params.id;
+  if (!courseId) {
+    return appErrorService(400, '請填寫課程ID', next);
+  }
+  try {
+    const course = await CourseModel.findById(courseId)
+      .select('-reason -approvalStatus -__v')
+      .populate({ path: 'coursePrice', select: 'count price -course' })
+      .populate({ path: 'coach', select: '_id name specialty' })
+      .lean();
+    if (!course) {
+      return appErrorService(400, '找不到課程', next);
+    }
+    return handleSuccess(res, 200, 'get data', course);
+  } catch (error) {
+    return appErrorService(400, (error as Error).message, next);
+  }
+});
 
 //建立課程
 export const createCourse = handleErrorAsync(async (req, res, next) => {
@@ -172,21 +242,22 @@ export const deleteCourse = handleErrorAsync(async (req, res, next) => {
   const { courseId } = req.params;
   const userId = req.user?.id;
   const course = await CourseModel.findOne({
-    course: courseId,
+    _id: courseId,
     coach: userId,
   });
   if (course) {
     //判斷是否有今天以後的預約課程 bookingCourse，有的話不可刪除課程
     //如果有學員購買了但尚未上完，也不可刪除=>order remainingCount > 0
+    const today = new Date();
     const bookings = await BookingCourseModel.countDocuments({
       startTime: {
-        $gte: new Date(),
-        isCanceled: false,
-        course: courseId,
+        $gte: today,
       },
+      isCanceled: false,
+      course: courseId,
     }).exec();
     const orders = await OrderModel.countDocuments({
-      course: courseId,
+      courseId: courseId,
       remainingCount: { $ne: '0' },
     }).exec();
     if (bookings > 0 || orders > 0) {
@@ -201,6 +272,7 @@ export const deleteCourse = handleErrorAsync(async (req, res, next) => {
     await CourseScheduleModel.deleteMany({
       course: courseId,
     });
+    return handleSuccess(res, 200, 'delete success');
   } else {
     return appErrorService(400, 'delete failed', next);
   }
@@ -230,6 +302,35 @@ export const coachGetCourses = handleErrorAsync(async (req, res, next) => {
 
   return handleSuccess(res, 200, 'get data', results, meta);
 });
+
+// 教練-編輯課程
+export const editCourse = handleErrorAsync(async (req, res, next) => {
+  const userId = req.user?.id;
+  const courseId = req.params.courseId;
+  const { name, coverImage, description, content, courseCategories, isActive } = req.body;
+  const courseModelData = await CourseModel.findOneAndUpdate(
+    {
+      _id: courseId,
+      coach: userId,
+    },
+    {
+      name,
+      coverImage,
+      description,
+      content,
+      courseCategories,
+      isActive,
+    },
+    {
+      new: true,
+    }
+  );
+  if (!courseModelData) {
+    return appErrorService(400, 'update failed', next);
+  }
+  return handleSuccess(res, 200, 'get data', courseModelData);
+});
+
 //教練-取得課程授課時間
 export const getSchedule = handleErrorAsync(async (req, res, next) => {
   const courseId = req.params.courseId;
@@ -288,6 +389,7 @@ export const purchaseCourse = handleErrorAsync(async (req, res, next) => {
     merchantId: MERCHANT_ID,
     totalPrice: orderInfo[timeStamp].Amt,
     purchaseCount: amount,
+    remainingCount: amount,
     price,
     name,
     tradeInfo: TradeInfo,
@@ -341,7 +443,7 @@ export const spgatewayNotify = handleErrorAsync(async (req, res, next) => {
         new: true,
         upsert: true,
         runValidators: true,
-      },
+      }
     );
     return handleSuccess(res, 200, 'get data');
   } catch (error) {
@@ -386,4 +488,31 @@ export const spgatewayReturn = handleErrorAsync(async (req, res, next) => {
   } catch (error) {
     return appErrorService(400, (error as Error).message, next);
   }
+});
+
+// 評價課程
+export const coursesEvaluation = handleErrorAsync(async (req, res, next) => {
+  const userId = req.user?.id;
+  const courseId = req.params.courseId;
+  const { star, comment } = req.body;
+  const courseModelData = await CourseModel.findById(courseId).lean();
+  if (!courseModelData) {
+    return appErrorService(400, '找不到課程', next);
+  }
+  const orderModelData = await OrderModel.findOne({
+    userId,
+    courseId,
+    status: 'success',
+    remainingCount: '0',
+  }).lean();
+  if (!orderModelData) {
+    return appErrorService(400, '找不到訂單', next);
+  }
+  await CourseEvaluationModel.create({
+    userId,
+    courseId,
+    star,
+    comment,
+  });
+  return handleSuccess(res, 200, '評論成功');
 });

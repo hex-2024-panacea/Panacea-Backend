@@ -1,9 +1,9 @@
+import { v4 as uuidv4 } from 'uuid';
 import handleErrorAsync from '../service/handleErrorAsync';
 import appErrorService from '../service/appErrorService';
 import handleSuccess from '../service/handleSuccess';
-import { v4 as uuidv4 } from 'uuid';
-const firebaseAdmin = require('firebase-admin');
 
+const firebaseAdmin = require('firebase-admin');
 const config = {
   type: process.env.FIREBASE_TYPE,
   project_id: process.env.FIREBASE_PROJECT_ID,
@@ -29,6 +29,16 @@ export const upload = handleErrorAsync(async (req: any, res: any, next: any) => 
     return appErrorService(400, 'No file uploaded.', next);
   }
   const originalExt = req.file.originalname.split('.').pop();
+  const allowedExtensions = ['jpg', 'png', 'jpeg', 'gif', 'svg', 'webp']; // 圖片副檔名列表
+  const allowedFileSize = 10 * 1024 * 1024; // 10MB
+
+  if (!allowedExtensions.includes(originalExt.toLowerCase())) {
+    return appErrorService(400, '請上傳圖片相關檔案', next);
+  }
+
+  if (req.file.size > allowedFileSize) {
+    return appErrorService(400, '最大上傳 10 MB', next);
+  }
   const filename = `${uuidv4()}.${originalExt}`;
   try {
     const blob = bucket.file(filename);
@@ -38,7 +48,7 @@ export const upload = handleErrorAsync(async (req: any, res: any, next: any) => 
       },
     });
     blobStream.on('error', (err: any) => {
-      appErrorService(400, err, next);
+      return appErrorService(400, err, next);
     });
     blobStream.on('finish', async () => {
       // 構建公開 URL，供訪問
@@ -46,7 +56,7 @@ export const upload = handleErrorAsync(async (req: any, res: any, next: any) => 
       // 確保文件為公開訪問（如果需要）
       await blob.makePublic();
       // 返回文件的 URL
-      handleSuccess(res, 200, 'mail is sent', { imageUrl: publicUrl });
+      return handleSuccess(res, 200, '圖片已成功上傳', { imageUrl: publicUrl });
     });
     blobStream.end(req.file.buffer);
   } catch (error: any) {

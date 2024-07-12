@@ -10,7 +10,7 @@ export const updateOrderCount = async (courseId: ObjectId, next: NextFunction) =
       courseId: courseId,
     });
     if (order) {
-      let { remainingCount, bookingCount } = order;
+      const { remainingCount, bookingCount } = order;
       let remainingCountNum = parseInt(remainingCount as string, 10);
       let bookingCountNum = parseInt(bookingCount as string, 10);
       if (!isNaN(remainingCountNum)) {

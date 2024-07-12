@@ -6,9 +6,9 @@ export const createZod = z.object({
   name: z.string(),
   coverImage: z.string(),
   description: z.string(),
-  category: z.string().array().min(1),
-  subCategory: z.string().array().min(1),
-  startDate: z.string().date(),
+  category: z.string().array().min(1).optional(),
+  subCategory: z.string().array().min(1).optional(),
+  startDate: z.string().date().optional(),
   isActive: z.boolean(),
 });
 export const priceZod = z.object({
@@ -22,8 +22,8 @@ export const scheduleZod = z.object({
   id: z.custom<ObjectId>().optional(),
   coach: z.custom<ObjectId>(),
   course: z.custom<ObjectId>(),
-  startTime: z.string().datetime(),
-  endTime: z.string().datetime(),
+  startTime: z.string().datetime({ offset: true }),
+  endTime: z.string().datetime({ offset: true }),
 });
 export const editScheduleZod = z.array(scheduleZod);
 export const getScheduleZod = z.object({

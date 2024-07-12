@@ -23,7 +23,15 @@ export const userOrders = handleErrorAsync(async (req, res, next) => {
     .skip(perPage * page)
     .select(
       '_id createdAt courseId name price purchaseCount totalPrice remainingCount bookingCount status paymentType payTime',
-    );
+    )
+    .populate({
+      path: 'course',
+      select: '_id name description coverImage category subCategory',
+      populate: {
+        path: 'coach',
+        select: '_id name avatar',
+      },
+    });
 
   const meta = await pagination(OrderModel, filters, page, orderIndexSetting);
 
