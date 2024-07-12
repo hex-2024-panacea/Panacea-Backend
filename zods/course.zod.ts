@@ -8,7 +8,7 @@ export const createZod = z.object({
   description: z.string(),
   category: z.string().array().min(1).optional(),
   subCategory: z.string().array().min(1).optional(),
-  startDate: z.string().date(),
+  startDate: z.string().date().optional(),
   isActive: z.boolean(),
 });
 export const priceZod = z.object({
