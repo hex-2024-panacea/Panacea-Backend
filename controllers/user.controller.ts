@@ -51,14 +51,13 @@ export const signIn = handleErrorAsync(async (req, res, next) => {
     if (isMatch) {
       //產生 token
       if (!user.emailVerifiedAt) {
-        await registerMailSend(email, user.id, res);
+        return await registerMailSend(email, user.id, res);
       } else {
-        generateJwtSend(user.id, res);
+        return generateJwtSend(user.id, res);
       }
     }
-  } else {
-    appErrorService(400, 'email or password is not correct', next);
   }
+  appErrorService(400, 'email or password is not correct', next);
 });
 
 // 寄送Email驗證信
@@ -88,7 +87,7 @@ export const verifyEmail = handleErrorAsync(async (req, res, next) => {
       },
       {
         emailVerifiedAt: Date.now(),
-      }
+      },
     );
     handleSuccess(res, 200, 'mail is verified');
   } else {
@@ -126,7 +125,7 @@ export const resetPassword = handleErrorAsync(async (req, res, next) => {
     },
     {
       password: newPassword,
-    }
+    },
   );
   if (user) {
     await revokeAllToken(user.id);
@@ -171,7 +170,7 @@ export const userUpdate = handleErrorAsync(async (req, res, next) => {
     const currentUser = await UserModel.findOneAndUpdate(
       { _id },
       { $set: updateFields },
-      { new: true, select: isCoach ? COACH : USER }
+      { new: true, select: isCoach ? COACH : USER },
     );
     handleSuccess(res, 200, 'get data', currentUser);
   } catch (error) {
@@ -218,7 +217,7 @@ export const applyCoach = handleErrorAsync(async (req, res, next) => {
           approvalStatus: 'pending',
         },
       },
-      { runValidators: true, new: true }
+      { runValidators: true, new: true },
     );
     handleSuccess(res, 200, 'submit success');
   } catch (error) {
