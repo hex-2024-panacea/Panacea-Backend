@@ -18,10 +18,6 @@ const getUserModel = async (id: string, email: string, _page: number, _pageSize:
 
 // 後台 - 學員列表
 export const adminUserList = handleErrorAsync(async (req, res, next) => {
-  const isAdmin = req.user?.isAdmin;
-  if (!isAdmin) {
-    return appErrorService(403, 'you are not a Admin', next);
-  }
   const { page, pageSize, id, email } = req.query;
   try {
     const _page = parseInt(page as string) || 1; // 默認第 1 頁
@@ -42,10 +38,6 @@ export const adminUserList = handleErrorAsync(async (req, res, next) => {
 
 // 後台 - 學員編輯資料
 export const adminUpdateUserInfo = handleErrorAsync(async (req, res, next) => {
-  const isAdmin = req.user?.isAdmin;
-  if (!isAdmin) {
-    return appErrorService(403, 'you are not a Admin', next);
-  }
   const { id } = req.params;
   try {
     const validationResult = await adminUpdateCoachInfoZod.safeParse(req.body);
@@ -57,7 +49,7 @@ export const adminUpdateUserInfo = handleErrorAsync(async (req, res, next) => {
         {
           updatedAt: Date.now(),
           ...req.body,
-        }
+        },
       );
       return handleSuccess(res, 200, 'Edited Successfully');
     } else {
@@ -70,10 +62,6 @@ export const adminUpdateUserInfo = handleErrorAsync(async (req, res, next) => {
 
 // 後台 - 教練列表
 export const adminCoachList = handleErrorAsync(async (req, res, next) => {
-  const isAdmin = req.user?.isAdmin;
-  if (!isAdmin) {
-    return appErrorService(403, 'you are not a Admin', next);
-  }
   const { page, pageSize, id, email } = req.query;
   try {
     const _page = parseInt(page as string) || 1; // 默認第 1 頁
@@ -94,10 +82,6 @@ export const adminCoachList = handleErrorAsync(async (req, res, next) => {
 
 // 後台 - 更新教練資料
 export const adminUpdateCoachInfo = handleErrorAsync(async (req, res, next) => {
-  const isAdmin = req.user?.isAdmin;
-  if (!isAdmin) {
-    return appErrorService(403, 'you are not a Admin', next);
-  }
   const { id } = req.params;
   try {
     const validationResult = await adminUpdateCoachInfoZod.safeParse(req.body);
@@ -109,7 +93,7 @@ export const adminUpdateCoachInfo = handleErrorAsync(async (req, res, next) => {
         {
           updatedAt: Date.now(),
           ...req.body,
-        }
+        },
       );
       return handleSuccess(res, 200, 'Edited Successfully');
     } else {
@@ -126,10 +110,6 @@ type updateDataType = {
 };
 // 後台 - 審核教練
 export const adminReviewCoach = handleErrorAsync(async (req, res, next) => {
-  const isAdmin = req.user?.isAdmin;
-  if (!isAdmin) {
-    return appErrorService(403, 'you are not a Admin', next);
-  }
   const { id } = req.params;
   const { approvalStatus, reason }: updateDataType = req.body;
   try {
